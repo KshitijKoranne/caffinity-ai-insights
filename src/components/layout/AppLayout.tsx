@@ -33,7 +33,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
         animate={{ rotate: 360 }}
         transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
       >
-        <Coffee className="h-10 w-10 text-coffee" />
+        <Coffee className="h-10 w-10 text-[#FAFAFA]" />
       </motion.div>
     </div>
   );
@@ -74,8 +74,8 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
       <header className="sticky top-0 border-b border-border bg-background/80 backdrop-blur-sm z-10 py-3 px-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <Coffee className="h-6 w-6 text-coffee mr-2" />
-            <span className="font-bold text-coffee-dark">Caffinity</span>
+            <Coffee className="h-6 w-6 text-[#FAFAFA] mr-2" />
+            <span className="font-caffeinated text-[#FAFAFA]">Caffinity</span>
           </div>
           <ThemeSwitcher />
         </div>
@@ -104,7 +104,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
             className={cn(
               "flex flex-col items-center justify-center space-y-1 w-16 h-full relative",
               item.active
-                ? "text-coffee font-medium"
+                ? "text-[#FAFAFA] font-medium"
                 : "text-muted-foreground hover:text-coffee-dark"
             )}
           >

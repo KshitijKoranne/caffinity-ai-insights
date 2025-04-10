@@ -43,10 +43,15 @@ const AddCaffeineForm = () => {
     // Save the entry
     saveCaffeineEntry(entry);
     
-    // Show success message
+    // Show success message with note information if provided
+    let description = `Added ${beverage.caffeine}mg from ${beverage.name}`;
+    if (notes.trim()) {
+      description += ` with note: "${notes.trim()}"`;
+    }
+    
     toast({
       title: "Caffeine logged",
-      description: `Added ${beverage.caffeine}mg from ${beverage.name}`,
+      description: description,
     });
     
     // Navigate back to dashboard

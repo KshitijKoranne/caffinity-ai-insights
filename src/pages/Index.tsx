@@ -2,6 +2,8 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { Coffee } from "lucide-react";
+import { motion } from "framer-motion";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -17,9 +19,15 @@ const Index = () => {
     }
   }, [user, loading, navigate]);
 
-  // Return a loading indicator while checking auth state
   return (
-    <div className="h-screen w-full flex items-center justify-center">
+    <div className="h-screen w-full flex flex-col items-center justify-center">
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+      >
+        <Coffee className="h-12 w-12 text-[#FAFAFA] mb-4" />
+      </motion.div>
+      <h1 className="text-3xl font-caffeinated text-[#FAFAFA] mb-2">Caffinity</h1>
       <div className="animate-pulse text-coffee">Loading...</div>
     </div>
   );

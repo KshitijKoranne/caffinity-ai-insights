@@ -4,11 +4,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LoginForm from "@/components/auth/LoginForm";
 import SignupForm from "@/components/auth/SignupForm";
-import { Coffee } from "lucide-react";
+import { Coffee, Home } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const Auth = () => {
   const [activeTab, setActiveTab] = useState("login");
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-b from-coffee-light/10 to-cream/30">
@@ -18,17 +21,27 @@ const Auth = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-2 relative">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => navigate("/")}
+            className="absolute left-0 top-0 h-8 w-8 rounded-full bg-card/50 backdrop-blur-sm border border-border"
+            aria-label="Go to home"
+          >
+            <Home className="h-4 w-4" />
+          </Button>
+          
           <motion.div 
             className="flex items-center justify-center"
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <Coffee className="h-12 w-12 text-coffee" />
+            <Coffee className="h-12 w-12 text-[#FAFAFA]" />
           </motion.div>
           <motion.h1 
-            className="text-3xl font-bold text-coffee-dark"
+            className="text-3xl font-caffeinated text-[#FAFAFA]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.3 }}
