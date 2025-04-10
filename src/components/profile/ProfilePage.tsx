@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { LogOut, User, Settings, Save } from "lucide-react";
+import { LogOut, User, Settings, Save, Sun, Moon } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Profile {
@@ -27,6 +28,7 @@ const ProfilePage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   
   useEffect(() => {
     const loadProfile = async () => {
@@ -187,8 +189,18 @@ const ProfilePage = () => {
           <CardTitle className="text-lg">App Settings</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-4 text-muted-foreground text-sm">
-            More settings coming soon.
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {theme === "dark" ? (
+                <Moon className="h-5 w-5 text-amber-200" />
+              ) : (
+                <Sun className="h-5 w-5 text-coffee" />
+              )}
+              <span>{theme === "dark" ? "Dark Mode" : "Light Mode"}</span>
+            </div>
+            <Button variant="outline" onClick={toggleTheme}>
+              Switch to {theme === "dark" ? "Light" : "Dark"} Mode
+            </Button>
           </div>
         </CardContent>
       </Card>

@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -23,7 +22,6 @@ const Dashboard = () => {
   const [showNoteForEntry, setShowNoteForEntry] = useState<string | null>(null);
 
   useEffect(() => {
-    // Load caffeine data
     const total = getDailyCaffeineTotal(currentDate);
     const limit = getRecommendedCaffeineLimit();
     const todayEntries = getCaffeineEntriesForDate(currentDate);
@@ -34,10 +32,8 @@ const Dashboard = () => {
     setLoading(false);
   }, [currentDate]);
 
-  // Calculate percentage of recommended limit
   const percentage = Math.min(Math.round((caffeineTotal / recommendedLimit) * 100), 100);
   
-  // Determine status color based on caffeine intake
   const getStatusColor = () => {
     if (percentage < 50) return "bg-alert-low";
     if (percentage < 85) return "bg-yellow-500";
@@ -112,9 +108,8 @@ const Dashboard = () => {
                     >
                       <Progress value={percentage} className="h-2" />
                     </motion.div>
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>0 mg</span>
-                      <span>Recommended: {recommendedLimit} mg</span>
+                    <div className="flex justify-end text-xs text-muted-foreground">
+                      <span>Maximum: {recommendedLimit} mg</span>
                     </div>
                     
                     {percentage > 85 && (
@@ -125,7 +120,7 @@ const Dashboard = () => {
                         transition={{ duration: 0.3 }}
                       >
                         <AlertTriangle className="h-4 w-4" />
-                        <span>You're approaching your daily recommended limit</span>
+                        <span>You're approaching your daily maximum limit</span>
                       </motion.div>
                     )}
                   </div>
