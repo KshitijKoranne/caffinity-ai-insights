@@ -1,11 +1,12 @@
 
 import { ReactNode, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Coffee, Book, User, Plus, Moon, Sun } from "lucide-react";
+import { Home, Coffee, Book, User, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
 import { AnimatePresence, motion } from "framer-motion";
+import { useTheme } from "@/contexts/ThemeContext";
 
 type NavItem = {
   label: string;
@@ -18,6 +19,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const { theme } = useTheme();
 
   // Check authentication
   useEffect(() => {
@@ -33,7 +35,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
         animate={{ rotate: 360 }}
         transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
       >
-        <Coffee className="h-10 w-10 text-[#FAFAFA]" />
+        <Coffee className="h-10 w-10 text-coffee" />
       </motion.div>
     </div>
   );
@@ -74,8 +76,8 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
       <header className="sticky top-0 border-b border-border bg-background/80 backdrop-blur-sm z-10 py-3 px-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <Coffee className="h-6 w-6 text-[#FAFAFA] mr-2" />
-            <span className="font-caffeinated text-[#FAFAFA]">Caffinity</span>
+            <Coffee className="h-6 w-6 text-coffee mr-2" />
+            <span className={`font-caffeinated ${theme === 'dark' ? 'text-[#FAFAFA]' : 'text-coffee-dark'}`}>Caffinity</span>
           </div>
           <ThemeSwitcher />
         </div>
@@ -104,7 +106,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
             className={cn(
               "flex flex-col items-center justify-center space-y-1 w-16 h-full relative",
               item.active
-                ? "text-[#FAFAFA] font-medium"
+                ? `${theme === 'dark' ? 'text-[#FAFAFA]' : 'text-coffee-dark'} font-medium`
                 : "text-muted-foreground hover:text-coffee-dark"
             )}
           >

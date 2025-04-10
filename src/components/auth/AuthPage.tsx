@@ -5,9 +5,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
 import { Coffee } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const AuthPage = () => {
   const [activeTab, setActiveTab] = useState("login");
+  const { theme } = useTheme();
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-b from-coffee-light/10 to-cream/30">
@@ -16,7 +18,7 @@ const AuthPage = () => {
           <div className="flex items-center justify-center">
             <Coffee className="h-12 w-12 text-coffee" />
           </div>
-          <h1 className="text-3xl font-bold text-coffee-dark">Caffinity</h1>
+          <h1 className={`text-3xl font-caffeinated ${theme === 'dark' ? 'text-[#FAFAFA]' : 'text-coffee-dark'}`}>Caffinity</h1>
           <p className="text-muted-foreground">
             Track your caffeine. Get personalized insights.
           </p>

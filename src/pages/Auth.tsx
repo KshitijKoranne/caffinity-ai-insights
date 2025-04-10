@@ -8,10 +8,12 @@ import { Coffee, Home } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const Auth = () => {
   const [activeTab, setActiveTab] = useState("login");
   const navigate = useNavigate();
+  const { theme } = useTheme();
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-b from-coffee-light/10 to-cream/30">
@@ -38,10 +40,10 @@ const Auth = () => {
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <Coffee className="h-12 w-12 text-[#FAFAFA]" />
+            <Coffee className="h-12 w-12 text-coffee" />
           </motion.div>
           <motion.h1 
-            className="text-3xl font-caffeinated text-[#FAFAFA]"
+            className={`text-3xl font-caffeinated ${theme === 'dark' ? 'text-[#FAFAFA]' : 'text-coffee-dark'}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.3 }}

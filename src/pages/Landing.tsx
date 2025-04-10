@@ -66,7 +66,7 @@ const Landing = () => {
               
               <motion.h1 
                 variants={fadeIn}
-                className="text-4xl md:text-5xl lg:text-6xl font-caffeinated text-coffee-dark font-bold"
+                className={`text-4xl md:text-5xl lg:text-6xl font-caffeinated ${theme === 'dark' ? 'text-[#FAFAFA]' : 'text-coffee-dark'} font-bold`}
               >
                 Caffinity
               </motion.h1>
@@ -121,7 +121,7 @@ const Landing = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl font-bold text-coffee-dark mb-4 font-caffeinated">Why Caffinity?</h2>
+            <h2 className={`text-3xl font-bold ${theme === 'dark' ? 'text-[#FAFAFA]' : 'text-coffee-dark'} mb-4 font-caffeinated`}>Why Caffinity?</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Your personal caffeine assistant that helps you maintain the perfect balance between energy and wellness.
             </p>
@@ -157,7 +157,7 @@ const Landing = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="text-3xl font-bold text-coffee-dark mb-4 font-caffeinated">Ready to optimize your caffeine?</h2>
+            <h2 className={`text-3xl font-bold ${theme === 'dark' ? 'text-[#FAFAFA]' : 'text-coffee-dark'} mb-4 font-caffeinated`}>Ready to optimize your caffeine?</h2>
             <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
               Join thousands of users who have improved their energy levels and sleep quality with Caffinity.
             </p>
@@ -177,7 +177,7 @@ const Landing = () => {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center mb-4 md:mb-0">
             <Coffee className="h-6 w-6 text-coffee mr-2" />
-            <span className="font-bold text-coffee-dark font-caffeinated">Caffinity</span>
+            <span className={`font-bold ${theme === 'dark' ? 'text-[#FAFAFA]' : 'text-coffee-dark'} font-caffeinated`}>Caffinity</span>
           </div>
           <div className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} Caffinity. All rights reserved.
