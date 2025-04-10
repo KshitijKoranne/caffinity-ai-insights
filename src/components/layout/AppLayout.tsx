@@ -48,14 +48,18 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
       {/* Bottom navigation bar */}
       <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-2 z-10">
         <div className="max-w-lg mx-auto flex justify-between items-center px-2">
-          <NavItem
-            icon={<Coffee className="h-5 w-5" />}
-            label="Today"
-            path="/dashboard"
-            isActive={currentPath === "/dashboard"}
-            onClick={() => navigateTo("/dashboard")}
-          />
+          {/* Dashboard nav item */}
+          <div className="flex-1 flex justify-start">
+            <NavItem
+              icon={<Coffee className="h-5 w-5" />}
+              label="Today"
+              path="/dashboard"
+              isActive={currentPath === "/dashboard"}
+              onClick={() => navigateTo("/dashboard")}
+            />
+          </div>
           
+          {/* Add button (centered) */}
           <div className="flex justify-center">
             <Button
               size={isMobile ? "icon" : "default"}
@@ -66,7 +70,8 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
             </Button>
           </div>
 
-          <div className="flex space-x-2">
+          {/* Right side nav items */}
+          <div className="flex-1 flex justify-end space-x-2">
             <NavItem
               icon={<Package className="h-5 w-5" />}
               label="Catalog"

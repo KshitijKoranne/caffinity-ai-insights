@@ -14,6 +14,117 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+// Entry Item Component to display individual caffeine entries
+const EntryItem = ({ entry, toggleNote, showNote }: { 
+  entry: CaffeineEntry, 
+  toggleNote: (id: string) => void,
+  showNote: boolean
+}) => (
+  <motion.div
+    variants={{
+      hidden: { y: 20, opacity: 0 },
+      visible: { y: 0, opacity: 1 }
+    }}
+  >
+    <Card className="overflow-hidden border-coffee/10">
+      <div className="flex items-center p-3">
+        <div className="h-10 w-10 rounded-full bg-coffee/10 flex items-center justify-center mr-3">
+          <Coffee className="h-5 w-5 text-coffee" />
+        </div>
+        <div className="flex-1">
+          <h3 className="font-medium">{entry.beverageName}</h3>
+          <p className="text-xs text-muted-foreground">{entry.servingSize}</p>
+          {showNote && entry.notes && (
+            <p className="text-xs mt-2 bg-muted/30 p-2 rounded">
+              {entry.notes}
+            </p>
+          )}
+        </div>
+        <div className="text-right flex flex-col items-end">
+          <p className="font-medium">{entry.caffeineAmount} mg</p>
+          <p className="text-xs text-muted-foreground">
+            {formatTimeForDisplay(entry.date)}
+          </p>
+          {entry.notes && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-6 w-6 mt-1" 
+                  onClick={() => toggleNote(entry.id)}
+                >
+                  <FileText className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>View notes</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
+      </div>
+    </Card>
+  </motion.div>
+);
+
+// Progress Status Component
+const CaffeineProgress = ({ caffeineTotal, recommendedLimit }: { 
+  caffeineTotal: number, 
+  recommendedLimit: number 
+}) => {
+  const percentage = Math.min(Math.round((caffeineTotal / recommendedLimit) * 100), 100);
+  
+  const getStatusColor = () => {
+    if (percentage < 50) return "bg-green-500";
+    if (percentage < 85) return "bg-yellow-500";
+    return "bg-red-500";
+  };
+
+  return (
+    <motion.div
+      initial={{ y: 20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.4 }}
+    >
+      <Card className="border-coffee/20">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg flex items-center justify-between">
+            <span>Daily Caffeine Intake</span>
+            <span className={`text-xl font-bold ${percentage > 85 ? "text-red-500" : ""}`}>
+              {caffeineTotal} mg
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Progress 
+              value={percentage} 
+              className="h-2" 
+              indicatorClassName={getStatusColor()} 
+            />
+            <div className="flex justify-end text-xs text-muted-foreground">
+              <span>Maximum: {recommendedLimit} mg</span>
+            </div>
+            
+            {percentage > 85 && (
+              <motion.div 
+                className="flex items-center gap-2 text-xs text-red-500 mt-2 bg-red-500/10 p-2 rounded"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                transition={{ duration: 0.3 }}
+              >
+                <AlertTriangle className="h-4 w-4" />
+                <span>You're approaching your daily maximum limit</span>
+              </motion.div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+};
+
 const Dashboard = () => {
   const [caffeineTotal, setCaffeineTotal] = useState(0);
   const [recommendedLimit, setRecommendedLimit] = useState(400);
@@ -24,12 +135,17 @@ const Dashboard = () => {
 
   // Function to load the latest data
   const loadLatestData = useCallback(() => {
-    console.log("Loading latest caffeine data for date:", currentDate);
+    console.log("Dashboard - Loading latest caffeine data for date:", currentDate);
     try {
-      const todayEntries = getCaffeineEntriesForDate(currentDate);
-      console.log("Entries found:", todayEntries.length);
+      // Get today's entries (we adjust the date format for consistent comparison)
+      const todayDateOnly = new Date(currentDate).toISOString().split('T')[0];
+      console.log("Using normalized date for filtering:", todayDateOnly);
       
-      // Calculate the total from the actual entries (more reliable)
+      // Get entries for today
+      const todayEntries = getCaffeineEntriesForDate(todayDateOnly);
+      console.log("Today's entries loaded:", todayEntries);
+      
+      // Calculate the total from the entries
       let calculatedTotal = 0;
       todayEntries.forEach(entry => {
         calculatedTotal += entry.caffeineAmount;
@@ -54,6 +170,7 @@ const Dashboard = () => {
 
   // Initial data load
   useEffect(() => {
+    console.log("Dashboard component mounted, loading initial data");
     loadLatestData();
   }, [loadLatestData]);
 
@@ -76,7 +193,7 @@ const Dashboard = () => {
   // Listen for caffeine-updated custom event (within the same window)
   useEffect(() => {
     const handleCaffeineUpdated = () => {
-      console.log("Caffeine updated event received, reloading data");
+      console.log("Caffeine updated event received in Dashboard, reloading data");
       // Force reload from localStorage
       loadLatestData();
     };
@@ -87,20 +204,18 @@ const Dashboard = () => {
     };
   }, [loadLatestData]);
 
-  const percentage = Math.min(Math.round((caffeineTotal / recommendedLimit) * 100), 100);
-  
-  const getStatusColor = () => {
-    if (percentage < 50) return "bg-alert-low";
-    if (percentage < 85) return "bg-yellow-500";
-    return "bg-alert-high";
-  };
-
   const toggleNote = (entryId: string) => {
     if (showNoteForEntry === entryId) {
       setShowNoteForEntry(null);
     } else {
       setShowNoteForEntry(entryId);
     }
+  };
+
+  // Added this to debug in the UI
+  const forceRefresh = () => {
+    console.log("Force refreshing data...");
+    loadLatestData();
   };
 
   return (
@@ -113,9 +228,10 @@ const Dashboard = () => {
           </p>
         </div>
         <motion.div 
-          className="h-10 w-10 rounded-full bg-coffee flex items-center justify-center"
+          className="h-10 w-10 rounded-full bg-coffee flex items-center justify-center cursor-pointer"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
+          onClick={forceRefresh}
         >
           <Coffee className="h-5 w-5 text-white" />
         </motion.div>
@@ -138,46 +254,11 @@ const Dashboard = () => {
             exit={{ opacity: 0 }}
             className="space-y-6"
           >
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.4 }}
-            >
-              <Card className="border-coffee/20">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center justify-between">
-                    <span>Daily Caffeine Intake</span>
-                    <span className={`text-xl font-bold ${percentage > 85 ? "text-alert-high" : ""}`}>
-                      {caffeineTotal} mg
-                    </span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <Progress 
-                      value={percentage} 
-                      className="h-2" 
-                      indicatorClassName={getStatusColor()} 
-                    />
-                    <div className="flex justify-end text-xs text-muted-foreground">
-                      <span>Maximum: {recommendedLimit} mg</span>
-                    </div>
-                    
-                    {percentage > 85 && (
-                      <motion.div 
-                        className="flex items-center gap-2 text-xs text-alert-high mt-2 bg-alert-high/10 p-2 rounded"
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <AlertTriangle className="h-4 w-4" />
-                        <span>You're approaching your daily maximum limit</span>
-                      </motion.div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+            {/* Caffeine Progress Bar */}
+            <CaffeineProgress 
+              caffeineTotal={caffeineTotal} 
+              recommendedLimit={recommendedLimit}
+            />
 
             <motion.div
               initial={{ y: 20, opacity: 0 }}
@@ -194,7 +275,7 @@ const Dashboard = () => {
             >
               <h2 className="font-medium text-muted-foreground mb-3 flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
-                Today's Drinks
+                Today's Drinks ({entries.length})
               </h2>
               
               {entries.length === 0 ? (
@@ -221,53 +302,12 @@ const Dashboard = () => {
                   }}
                 >
                   {entries.map(entry => (
-                    <motion.div
+                    <EntryItem 
                       key={entry.id}
-                      variants={{
-                        hidden: { y: 20, opacity: 0 },
-                        visible: { y: 0, opacity: 1 }
-                      }}
-                    >
-                      <Card className="overflow-hidden border-coffee/10">
-                        <div className="flex items-center p-3">
-                          <div className="h-10 w-10 rounded-full bg-coffee/10 flex items-center justify-center mr-3">
-                            <Coffee className="h-5 w-5 text-coffee" />
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="font-medium">{entry.beverageName}</h3>
-                            <p className="text-xs text-muted-foreground">{entry.servingSize}</p>
-                            {showNoteForEntry === entry.id && entry.notes && (
-                              <p className="text-xs mt-2 bg-muted/30 p-2 rounded">
-                                {entry.notes}
-                              </p>
-                            )}
-                          </div>
-                          <div className="text-right flex flex-col items-end">
-                            <p className="font-medium">{entry.caffeineAmount} mg</p>
-                            <p className="text-xs text-muted-foreground">
-                              {formatTimeForDisplay(entry.date)}
-                            </p>
-                            {entry.notes && (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="icon" 
-                                    className="h-6 w-6 mt-1" 
-                                    onClick={() => toggleNote(entry.id)}
-                                  >
-                                    <FileText className="h-3 w-3" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>View notes</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            )}
-                          </div>
-                        </div>
-                      </Card>
-                    </motion.div>
+                      entry={entry}
+                      toggleNote={toggleNote}
+                      showNote={showNoteForEntry === entry.id}
+                    />
                   ))}
                 </motion.div>
               )}

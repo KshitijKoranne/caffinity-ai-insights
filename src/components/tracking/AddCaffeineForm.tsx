@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -24,11 +23,17 @@ const AddCaffeineForm = () => {
     if (!selectedBeverage) return;
 
     setIsSubmitting(true);
+    console.log("Form submitted with beverage:", selectedBeverage);
     
     // Find the selected beverage from catalog
     const beverage = BEVERAGE_CATALOG.find(b => b.id === selectedBeverage);
     if (!beverage) {
       console.error("Selected beverage not found in catalog");
+      toast({
+        title: "Error",
+        description: "Selected beverage not found. Please try again.",
+        variant: "destructive",
+      });
       setIsSubmitting(false);
       return;
     }
@@ -48,9 +53,6 @@ const AddCaffeineForm = () => {
       // Save the entry
       console.log("Saving caffeine entry:", entry);
       saveCaffeineEntry(entry);
-      
-      // Dispatch a custom event to notify the dashboard
-      window.dispatchEvent(new CustomEvent('caffeine-updated'));
       
       // Show success message
       let description = `Added ${beverage.caffeine}mg from ${beverage.name}`;
