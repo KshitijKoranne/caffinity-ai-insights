@@ -8,6 +8,7 @@ import { formatDateForDisplay, formatDateYMD } from "@/utils/dateUtils";
 import { getCaffeineEntriesForDate, getDailyCaffeineTotal } from "@/utils/caffeineData";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { DayContentProps } from "react-day-picker";
 
 const CalendarView = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -19,19 +20,20 @@ const CalendarView = () => {
   const entries = getCaffeineEntriesForDate(formattedDate);
   
   // Render the day contents for the calendar
-  const renderDayContents = (day: Date) => {
-    const dateString = formatDateYMD(day);
+  const renderDayContents = (props: DayContentProps) => {
+    const dateString = formatDateYMD(props.date);
     const total = getDailyCaffeineTotal(dateString);
     
     if (total > 0) {
       return (
         <div className="relative w-full h-full flex items-center justify-center">
+          {props.children}
           <div className={`absolute bottom-0 left-0 right-0 h-1 ${total > 300 ? 'bg-alert-high' : total > 150 ? 'bg-yellow-500' : 'bg-alert-low'}`}></div>
         </div>
       );
     }
     
-    return null;
+    return props.children;
   };
 
   return (
