@@ -4,13 +4,13 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import AuthPage from "./components/auth/AuthPage";
 import Dashboard from "./components/dashboard/Dashboard";
 import AddCaffeineForm from "./components/tracking/AddCaffeineForm";
 import BeverageCatalog from "./components/catalog/BeverageCatalog";
 import ProfilePage from "./components/profile/ProfilePage";
 import AppLayout from "./components/layout/AppLayout";
 import NotFound from "./pages/NotFound";
+import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
 
@@ -21,7 +21,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<AuthPage />} />
+          <Route path="/" element={<Index />} />
           
           {/* Protected Routes */}
           <Route path="/dashboard" element={
