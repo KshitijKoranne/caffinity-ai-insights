@@ -17,7 +17,12 @@ const Index = () => {
     }
   }, [user, loading, navigate]);
 
-  return null;
+  // Return a loading indicator while checking auth state
+  return (
+    <div className="h-screen w-full flex items-center justify-center">
+      <div className="animate-pulse text-coffee">Loading...</div>
+    </div>
+  );
 };
 
 export default Index;

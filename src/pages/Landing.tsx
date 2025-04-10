@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Coffee, Clock, TrendingUp, Brain, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTheme } from "@/contexts/ThemeContext";
+import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -39,9 +40,14 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen">
+      {/* Header with theme switcher */}
+      <header className="absolute top-0 right-0 p-4 z-10">
+        <ThemeSwitcher />
+      </header>
+
       {/* Hero Section */}
       <section className="relative">
-        <div className="bg-gradient-to-b from-coffee-light/30 to-background pt-20 pb-32 px-4 md:px-8">
+        <div className="bg-gradient-to-b from-coffee-light/30 to-background pt-20 pb-40 px-4 md:px-8">
           <div className="max-w-6xl mx-auto">
             <motion.div 
               className="text-center space-y-6"
@@ -60,7 +66,7 @@ const Landing = () => {
               
               <motion.h1 
                 variants={fadeIn}
-                className="text-4xl md:text-5xl lg:text-6xl font-bold text-coffee-dark"
+                className="text-4xl md:text-5xl lg:text-6xl font-caffeinated text-coffee-dark font-bold"
               >
                 Caffinity
               </motion.h1>
@@ -72,10 +78,10 @@ const Landing = () => {
                 Track your caffeine. Get personalized AI insights. Optimize your day.
               </motion.p>
               
-              <motion.div variants={fadeIn} className="pt-4 flex justify-center gap-4 flex-wrap">
+              <motion.div variants={fadeIn} className="pt-6 flex justify-center gap-4 flex-wrap">
                 <Button 
                   size="lg"
-                  className="bg-coffee hover:bg-coffee-dark text-white"
+                  className="bg-coffee hover:bg-coffee-dark text-white z-10"
                   onClick={() => navigate("/auth")}
                 >
                   Get Started <ArrowRight className="ml-2 h-4 w-4" />
@@ -83,6 +89,7 @@ const Landing = () => {
                 <Button 
                   variant="outline" 
                   size="lg"
+                  className="z-10"
                   onClick={() => navigate("/auth")}
                 >
                   Sign In
@@ -92,8 +99,8 @@ const Landing = () => {
           </div>
         </div>
         
-        {/* Wave separator */}
-        <div className="absolute bottom-0 left-0 right-0">
+        {/* Wave separator - fixed to be below the buttons */}
+        <div className="absolute bottom-0 left-0 right-0 z-0">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" className="w-full">
             <path
               fill={theme === 'dark' ? '#1a1a1a' : '#ffffff'}
@@ -114,7 +121,7 @@ const Landing = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl font-bold text-coffee-dark mb-4">Why Caffinity?</h2>
+            <h2 className="text-3xl font-bold text-coffee-dark mb-4 font-caffeinated">Why Caffinity?</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Your personal caffeine assistant that helps you maintain the perfect balance between energy and wellness.
             </p>
@@ -150,7 +157,7 @@ const Landing = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="text-3xl font-bold text-coffee-dark mb-4">Ready to optimize your caffeine?</h2>
+            <h2 className="text-3xl font-bold text-coffee-dark mb-4 font-caffeinated">Ready to optimize your caffeine?</h2>
             <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
               Join thousands of users who have improved their energy levels and sleep quality with Caffinity.
             </p>
@@ -170,7 +177,7 @@ const Landing = () => {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center mb-4 md:mb-0">
             <Coffee className="h-6 w-6 text-coffee mr-2" />
-            <span className="font-bold text-coffee-dark">Caffinity</span>
+            <span className="font-bold text-coffee-dark font-caffeinated">Caffinity</span>
           </div>
           <div className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} Caffinity. All rights reserved.
