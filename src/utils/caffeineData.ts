@@ -87,28 +87,55 @@ export const BEVERAGE_CATALOG: CaffeineBeverage[] = [
 
 // Get user's caffeine entries from local storage
 export const getCaffeineEntries = (): CaffeineEntry[] => {
-  const entries = localStorage.getItem("caffinity-entries");
-  return entries ? JSON.parse(entries) : [];
+  try {
+    const entries = localStorage.getItem("caffinity-entries");
+    if (!entries) return [];
+    return JSON.parse(entries);
+  } catch (error) {
+    console.error("Error parsing caffeine entries:", error);
+    return [];
+  }
 };
 
 // Save caffeine entry
 export const saveCaffeineEntry = (entry: CaffeineEntry): void => {
-  const entries = getCaffeineEntries();
-  entries.push(entry);
-  localStorage.setItem("caffinity-entries", JSON.stringify(entries));
+  try {
+    const entries = getCaffeineEntries();
+    entries.push(entry);
+    localStorage.setItem("caffinity-entries", JSON.stringify(entries));
+    console.log("Caffeine entry saved successfully:", entry);
+    console.log("Total entries now:", entries.length);
+  } catch (error) {
+    console.error("Error saving caffeine entry:", error);
+    throw new Error("Failed to save caffeine entry");
+  }
 };
 
 // Get daily caffeine total
 export const getDailyCaffeineTotal = (date: string): number => {
-  const entries = getCaffeineEntries();
-  const dailyEntries = entries.filter(entry => entry.date.startsWith(date));
-  return dailyEntries.reduce((total, entry) => total + entry.caffeineAmount, 0);
+  try {
+    const entries = getCaffeineEntries();
+    const dailyEntries = entries.filter(entry => entry.date.startsWith(date));
+    const total = dailyEntries.reduce((total, entry) => total + entry.caffeineAmount, 0);
+    console.log(`Total caffeine for ${date}:`, total, "mg from", dailyEntries.length, "entries");
+    return total;
+  } catch (error) {
+    console.error("Error calculating daily caffeine total:", error);
+    return 0;
+  }
 };
 
 // Get caffeine entries for a specific date
 export const getCaffeineEntriesForDate = (date: string): CaffeineEntry[] => {
-  const entries = getCaffeineEntries();
-  return entries.filter(entry => entry.date.startsWith(date));
+  try {
+    const entries = getCaffeineEntries();
+    const dailyEntries = entries.filter(entry => entry.date.startsWith(date));
+    console.log(`Found ${dailyEntries.length} entries for ${date}`);
+    return dailyEntries;
+  } catch (error) {
+    console.error("Error getting caffeine entries for date:", error);
+    return [];
+  }
 };
 
 // Get recommended caffeine limit (general guideline is 400mg for adults)

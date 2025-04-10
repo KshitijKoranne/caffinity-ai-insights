@@ -19,7 +19,7 @@ const NavItem = ({ icon, label, isActive, onClick }: NavItemProps) => {
   return (
     <Button
       variant={isActive ? "secondary" : "ghost"}
-      className={`flex items-center gap-2 w-full justify-start ${
+      className={`flex items-center gap-2 ${isMobile ? "w-10 h-10 p-0" : "w-full"} justify-center ${
         isActive ? "bg-coffee/10 hover:bg-coffee/20" : ""
       }`}
       onClick={onClick}
@@ -47,28 +47,26 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
 
       {/* Bottom navigation bar */}
       <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-2 z-10">
-        <div className="max-w-lg mx-auto grid grid-cols-3 gap-1 items-center">
-          <div className="flex justify-start">
-            <NavItem
-              icon={<Coffee className="h-5 w-5" />}
-              label="Today"
-              path="/dashboard"
-              isActive={currentPath === "/dashboard"}
-              onClick={() => navigateTo("/dashboard")}
-            />
-          </div>
+        <div className="max-w-lg mx-auto flex justify-between items-center px-2">
+          <NavItem
+            icon={<Coffee className="h-5 w-5" />}
+            label="Today"
+            path="/dashboard"
+            isActive={currentPath === "/dashboard"}
+            onClick={() => navigateTo("/dashboard")}
+          />
           
           <div className="flex justify-center">
             <Button
-              size={isMobile ? "default" : "lg"}
+              size={isMobile ? "icon" : "default"}
               onClick={() => navigateTo("/add")}
-              className="bg-coffee hover:bg-coffee-dark text-white rounded-full h-12 w-12 flex items-center justify-center shadow-lg -mt-8"
+              className="bg-coffee hover:bg-coffee-dark text-white rounded-full h-12 w-12 flex items-center justify-center shadow-lg -mt-6"
             >
               <Plus className="h-5 w-5" />
             </Button>
           </div>
 
-          <div className="flex justify-end space-x-1">
+          <div className="flex space-x-2">
             <NavItem
               icon={<Package className="h-5 w-5" />}
               label="Catalog"

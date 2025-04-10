@@ -27,7 +27,11 @@ const AddCaffeineForm = () => {
     
     // Find the selected beverage from catalog
     const beverage = BEVERAGE_CATALOG.find(b => b.id === selectedBeverage);
-    if (!beverage) return;
+    if (!beverage) {
+      console.error("Selected beverage not found in catalog");
+      setIsSubmitting(false);
+      return;
+    }
     
     // Create new caffeine entry
     const entry = {
@@ -40,31 +44,39 @@ const AddCaffeineForm = () => {
       notes: notes.trim() || undefined,
     };
     
-    // Save the entry
-    saveCaffeineEntry(entry);
-    
-    // Dispatch a custom event to notify the dashboard
-    window.dispatchEvent(new CustomEvent('caffeine-updated'));
-    
-    // For debugging - log the entry
-    console.log("Added new caffeine entry:", entry);
-    
-    // Show success message with note information if provided
-    let description = `Added ${beverage.caffeine}mg from ${beverage.name}`;
-    if (notes.trim()) {
-      description += ` with note: "${notes.trim()}"`;
-    }
-    
-    toast({
-      title: "Caffeine logged",
-      description: description,
-    });
-    
-    // Navigate back to dashboard
-    setTimeout(() => {
+    try {
+      // Save the entry
+      console.log("Saving caffeine entry:", entry);
+      saveCaffeineEntry(entry);
+      
+      // Dispatch a custom event to notify the dashboard
+      window.dispatchEvent(new CustomEvent('caffeine-updated'));
+      
+      // Show success message
+      let description = `Added ${beverage.caffeine}mg from ${beverage.name}`;
+      if (notes.trim()) {
+        description += ` with note: "${notes.trim()}"`;
+      }
+      
+      toast({
+        title: "Caffeine logged",
+        description: description,
+      });
+      
+      // Navigate back to dashboard after a slight delay
+      setTimeout(() => {
+        setIsSubmitting(false);
+        navigate("/dashboard");
+      }, 500);
+    } catch (error) {
+      console.error("Error saving caffeine entry:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save caffeine entry. Please try again.",
+        variant: "destructive",
+      });
       setIsSubmitting(false);
-      navigate("/dashboard");
-    }, 500);
+    }
   };
 
   return (

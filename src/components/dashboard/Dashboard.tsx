@@ -25,17 +25,31 @@ const Dashboard = () => {
   // Function to load the latest data
   const loadLatestData = useCallback(() => {
     console.log("Loading latest caffeine data for date:", currentDate);
-    const total = getDailyCaffeineTotal(currentDate);
-    const limit = getRecommendedCaffeineLimit();
-    const todayEntries = getCaffeineEntriesForDate(currentDate);
-    
-    console.log("Caffeine total:", total, "mg");
-    console.log("Entries found:", todayEntries.length);
-    
-    setCaffeineTotal(total);
-    setRecommendedLimit(limit);
-    setEntries(todayEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
-    setLoading(false);
+    try {
+      const todayEntries = getCaffeineEntriesForDate(currentDate);
+      console.log("Entries found:", todayEntries.length);
+      
+      // Calculate the total from the actual entries (more reliable)
+      let calculatedTotal = 0;
+      todayEntries.forEach(entry => {
+        calculatedTotal += entry.caffeineAmount;
+      });
+      
+      console.log("Calculated caffeine total:", calculatedTotal, "mg");
+      
+      // Sort entries by date (newest first)
+      const sortedEntries = [...todayEntries].sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+      
+      setCaffeineTotal(calculatedTotal);
+      setEntries(sortedEntries);
+      setRecommendedLimit(getRecommendedCaffeineLimit());
+      setLoading(false);
+    } catch (error) {
+      console.error("Error loading caffeine data:", error);
+      setLoading(false);
+    }
   }, [currentDate]);
 
   // Initial data load
@@ -45,9 +59,12 @@ const Dashboard = () => {
 
   // Listen for storage changes from other tabs
   useEffect(() => {
-    const handleStorageChange = () => {
-      console.log("Storage changed, reloading data");
-      loadLatestData();
+    const handleStorageChange = (e: StorageEvent) => {
+      console.log("Storage event detected:", e);
+      if (e.key === "caffinity-entries") {
+        console.log("Caffeine entries updated in another tab, reloading data");
+        loadLatestData();
+      }
     };
 
     window.addEventListener('storage', handleStorageChange);
@@ -60,6 +77,7 @@ const Dashboard = () => {
   useEffect(() => {
     const handleCaffeineUpdated = () => {
       console.log("Caffeine updated event received, reloading data");
+      // Force reload from localStorage
       loadLatestData();
     };
 
@@ -136,15 +154,11 @@ const Dashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    <motion.div 
-                      className={getStatusColor()}
-                      initial={{ scaleX: 0 }}
-                      animate={{ scaleX: 1 }}
-                      transition={{ duration: 0.8, ease: "easeOut" }}
-                      style={{ originX: 0 }}
-                    >
-                      <Progress value={percentage} className="h-2" />
-                    </motion.div>
+                    <Progress 
+                      value={percentage} 
+                      className="h-2" 
+                      indicatorClassName={getStatusColor()} 
+                    />
                     <div className="flex justify-end text-xs text-muted-foreground">
                       <span>Maximum: {recommendedLimit} mg</span>
                     </div>
