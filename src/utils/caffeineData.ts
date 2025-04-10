@@ -87,82 +87,28 @@ export const BEVERAGE_CATALOG: CaffeineBeverage[] = [
 
 // Get user's caffeine entries from local storage
 export const getCaffeineEntries = (): CaffeineEntry[] => {
-  try {
-    const entries = localStorage.getItem("caffinity-entries");
-    console.log("Raw entries from localStorage:", entries);
-    if (!entries) return [];
-    return JSON.parse(entries);
-  } catch (error) {
-    console.error("Error parsing caffeine entries:", error);
-    return [];
-  }
+  const entries = localStorage.getItem("caffinity-entries");
+  return entries ? JSON.parse(entries) : [];
 };
 
 // Save caffeine entry
 export const saveCaffeineEntry = (entry: CaffeineEntry): void => {
-  try {
-    const entries = getCaffeineEntries();
-    entries.push(entry);
-    localStorage.setItem("caffinity-entries", JSON.stringify(entries));
-    console.log("Caffeine entry saved successfully:", entry);
-    console.log("Total entries now:", entries.length);
-    console.log("All entries:", entries);
-    
-    // Dispatch an event to notify the dashboard of the update
-    window.dispatchEvent(new CustomEvent('caffeine-updated'));
-  } catch (error) {
-    console.error("Error saving caffeine entry:", error);
-    throw new Error("Failed to save caffeine entry");
-  }
+  const entries = getCaffeineEntries();
+  entries.push(entry);
+  localStorage.setItem("caffinity-entries", JSON.stringify(entries));
 };
 
 // Get daily caffeine total
 export const getDailyCaffeineTotal = (date: string): number => {
-  try {
-    const entries = getCaffeineEntries();
-    console.log(`Looking for entries on date: ${date}`);
-    console.log("All entries:", entries);
-    
-    // Filter entries by date (only looking at the date part, not time)
-    const dailyEntries = entries.filter(entry => {
-      const entryDate = new Date(entry.date).toISOString().split('T')[0];
-      const targetDate = date.split('T')[0];
-      const matches = entryDate === targetDate;
-      console.log(`Entry date: ${entryDate}, Target: ${targetDate}, Match: ${matches}`);
-      return matches;
-    });
-    
-    console.log(`Filtered entries for ${date}:`, dailyEntries);
-    const total = dailyEntries.reduce((total, entry) => total + entry.caffeineAmount, 0);
-    console.log(`Total caffeine for ${date}:`, total, "mg from", dailyEntries.length, "entries");
-    return total;
-  } catch (error) {
-    console.error("Error calculating daily caffeine total:", error);
-    return 0;
-  }
+  const entries = getCaffeineEntries();
+  const dailyEntries = entries.filter(entry => entry.date.startsWith(date));
+  return dailyEntries.reduce((total, entry) => total + entry.caffeineAmount, 0);
 };
 
 // Get caffeine entries for a specific date
 export const getCaffeineEntriesForDate = (date: string): CaffeineEntry[] => {
-  try {
-    const entries = getCaffeineEntries();
-    console.log(`Looking for entries on date: ${date}`);
-    
-    // Filter entries by date (only looking at the date part, not time)
-    const dailyEntries = entries.filter(entry => {
-      const entryDate = new Date(entry.date).toISOString().split('T')[0];
-      const targetDate = date.split('T')[0];
-      const matches = entryDate === targetDate;
-      console.log(`Entry date: ${entryDate}, Target: ${targetDate}, Match: ${matches}`);
-      return matches;
-    });
-    
-    console.log(`Found ${dailyEntries.length} entries for ${date}`);
-    return dailyEntries;
-  } catch (error) {
-    console.error("Error getting caffeine entries for date:", error);
-    return [];
-  }
+  const entries = getCaffeineEntries();
+  return entries.filter(entry => entry.date.startsWith(date));
 };
 
 // Get recommended caffeine limit (general guideline is 400mg for adults)

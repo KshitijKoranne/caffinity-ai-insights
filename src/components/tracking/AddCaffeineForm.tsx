@@ -3,9 +3,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { saveCaffeineEntry, BEVERAGE_CATALOG } from "@/utils/caffeineData";
 import { getCurrentDateYMD } from "@/utils/dateUtils";
@@ -23,20 +24,10 @@ const AddCaffeineForm = () => {
     if (!selectedBeverage) return;
 
     setIsSubmitting(true);
-    console.log("Form submitted with beverage:", selectedBeverage);
     
     // Find the selected beverage from catalog
     const beverage = BEVERAGE_CATALOG.find(b => b.id === selectedBeverage);
-    if (!beverage) {
-      console.error("Selected beverage not found in catalog");
-      toast({
-        title: "Error",
-        description: "Selected beverage not found. Please try again.",
-        variant: "destructive",
-      });
-      setIsSubmitting(false);
-      return;
-    }
+    if (!beverage) return;
     
     // Create new caffeine entry
     const entry = {
@@ -49,36 +40,25 @@ const AddCaffeineForm = () => {
       notes: notes.trim() || undefined,
     };
     
-    try {
-      // Save the entry
-      console.log("Saving caffeine entry:", entry);
-      saveCaffeineEntry(entry);
-      
-      // Show success message
-      let description = `Added ${beverage.caffeine}mg from ${beverage.name}`;
-      if (notes.trim()) {
-        description += ` with note: "${notes.trim()}"`;
-      }
-      
-      toast({
-        title: "Caffeine logged",
-        description: description,
-      });
-      
-      // Navigate back to dashboard after a slight delay
-      setTimeout(() => {
-        setIsSubmitting(false);
-        navigate("/dashboard");
-      }, 500);
-    } catch (error) {
-      console.error("Error saving caffeine entry:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save caffeine entry. Please try again.",
-        variant: "destructive",
-      });
-      setIsSubmitting(false);
+    // Save the entry
+    saveCaffeineEntry(entry);
+    
+    // Show success message with note information if provided
+    let description = `Added ${beverage.caffeine}mg from ${beverage.name}`;
+    if (notes.trim()) {
+      description += ` with note: "${notes.trim()}"`;
     }
+    
+    toast({
+      title: "Caffeine logged",
+      description: description,
+    });
+    
+    // Navigate back to dashboard
+    setTimeout(() => {
+      setIsSubmitting(false);
+      navigate("/dashboard");
+    }, 500);
   };
 
   return (

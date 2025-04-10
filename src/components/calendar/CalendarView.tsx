@@ -19,8 +19,8 @@ const CalendarView = () => {
   const entries = getCaffeineEntriesForDate(formattedDate);
   
   // Render the day contents for the calendar
-  const renderDayContents = (date: Date) => {
-    const dateString = formatDateYMD(date);
+  const renderDayContents = (day: Date) => {
+    const dateString = formatDateYMD(day);
     const total = getDailyCaffeineTotal(dateString);
     
     if (total > 0) {
@@ -62,7 +62,7 @@ const CalendarView = () => {
             onSelect={setSelectedDate}
             className="rounded-md border p-3 pointer-events-auto"
             components={{
-              DayContent: ({ date }) => renderDayContents(date),
+              DayContent: ({ day }) => renderDayContents(day),
             }}
           />
         </CardContent>
