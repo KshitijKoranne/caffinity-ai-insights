@@ -66,7 +66,9 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <Progress value={percentage} className="h-2" indicatorClassName={getStatusColor()} />
+                <div className={getStatusColor()}>
+                  <Progress value={percentage} className="h-2" />
+                </div>
                 <div className="flex justify-between text-xs text-muted-foreground">
                   <span>0 mg</span>
                   <span>Recommended: {recommendedLimit} mg</span>
