@@ -11,47 +11,54 @@ import ProfilePage from "./components/profile/ProfilePage";
 import AppLayout from "./components/layout/AppLayout";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
+import Landing from "./pages/Landing";
+import Auth from "./pages/Auth";
 import { AuthProvider } from "./contexts/AuthContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            
-            {/* Protected Routes */}
-            <Route path="/dashboard" element={
-              <AppLayout>
-                <Dashboard />
-              </AppLayout>
-            } />
-            <Route path="/add" element={
-              <AppLayout>
-                <AddCaffeineForm />
-              </AppLayout>
-            } />
-            <Route path="/catalog" element={
-              <AppLayout>
-                <BeverageCatalog />
-              </AppLayout>
-            } />
-            <Route path="/profile" element={
-              <AppLayout>
-                <ProfilePage />
-              </AppLayout>
-            } />
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/login" element={<Index />} />
+              
+              {/* Protected Routes */}
+              <Route path="/dashboard" element={
+                <AppLayout>
+                  <Dashboard />
+                </AppLayout>
+              } />
+              <Route path="/add" element={
+                <AppLayout>
+                  <AddCaffeineForm />
+                </AppLayout>
+              } />
+              <Route path="/catalog" element={
+                <AppLayout>
+                  <BeverageCatalog />
+                </AppLayout>
+              } />
+              <Route path="/profile" element={
+                <AppLayout>
+                  <ProfilePage />
+                </AppLayout>
+              } />
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

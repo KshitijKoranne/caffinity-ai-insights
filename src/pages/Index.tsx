@@ -1,7 +1,6 @@
 
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import AuthPage from "../components/auth/AuthPage";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
@@ -9,15 +8,16 @@ const Index = () => {
   const { user, loading } = useAuth();
 
   useEffect(() => {
-    // Check if user is already logged in
-    if (user && !loading) {
-      navigate("/dashboard");
+    if (!loading) {
+      if (user) {
+        navigate("/dashboard");
+      } else {
+        navigate("/");
+      }
     }
   }, [user, loading, navigate]);
 
-  if (loading) return null;
-
-  return <AuthPage />;
+  return null;
 };
 
 export default Index;

@@ -5,6 +5,8 @@ import { Progress } from "@/components/ui/progress";
 import { CaffeineEntry, getDailyCaffeineTotal, getCaffeineEntriesForDate, getRecommendedCaffeineLimit } from "@/utils/caffeineData";
 import { formatDateForDisplay, formatTimeForDisplay, getCurrentDateYMD } from "@/utils/dateUtils";
 import { Coffee, TrendingUp, AlertTriangle } from "lucide-react";
+import CaffeineInsights from "../insights/CaffeineInsights";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Dashboard = () => {
   const [caffeineTotal, setCaffeineTotal] = useState(0);
@@ -44,82 +46,151 @@ const Dashboard = () => {
             {formatDateForDisplay(new Date(currentDate))}
           </p>
         </div>
-        <div className="h-10 w-10 rounded-full bg-coffee flex items-center justify-center">
+        <motion.div 
+          className="h-10 w-10 rounded-full bg-coffee flex items-center justify-center"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
           <Coffee className="h-5 w-5 text-white" />
-        </div>
+        </motion.div>
       </header>
 
       {loading ? (
         <div className="flex justify-center p-8">
-          <div className="animate-pulse">Loading...</div>
+          <motion.div 
+            className="animate-pulse"
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >Loading...</motion.div>
         </div>
       ) : (
-        <>
-          <Card className="border-coffee/20">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center justify-between">
-                <span>Daily Caffeine Intake</span>
-                <span className={`text-xl font-bold ${percentage > 85 ? "text-alert-high" : ""}`}>
-                  {caffeineTotal} mg
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className={getStatusColor()}>
-                  <Progress value={percentage} className="h-2" />
-                </div>
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>0 mg</span>
-                  <span>Recommended: {recommendedLimit} mg</span>
-                </div>
-                
-                {percentage > 85 && (
-                  <div className="flex items-center gap-2 text-xs text-alert-high mt-2 bg-alert-high/10 p-2 rounded">
-                    <AlertTriangle className="h-4 w-4" />
-                    <span>You're approaching your daily recommended limit</span>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <div>
-            <h2 className="font-medium text-muted-foreground mb-3 flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              Today's Drinks
-            </h2>
-            
-            {entries.length === 0 ? (
-              <div className="text-center py-8 bg-muted/30 rounded-lg">
-                <p className="text-muted-foreground">No caffeine logged today.</p>
-                <p className="text-sm mt-1">Track your first drink!</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {entries.map(entry => (
-                  <Card key={entry.id} className="overflow-hidden border-coffee/10">
-                    <div className="flex items-center p-3">
-                      <div className="h-10 w-10 rounded-full bg-coffee/10 flex items-center justify-center mr-3">
-                        <Coffee className="h-5 w-5 text-coffee" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-medium">{entry.beverageName}</h3>
-                        <p className="text-xs text-muted-foreground">{entry.servingSize}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium">{entry.caffeineAmount} mg</p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatTimeForDisplay(entry.date)}
-                        </p>
-                      </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key="dashboard-content"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="space-y-6"
+          >
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.4 }}
+            >
+              <Card className="border-coffee/20">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center justify-between">
+                    <span>Daily Caffeine Intake</span>
+                    <span className={`text-xl font-bold ${percentage > 85 ? "text-alert-high" : ""}`}>
+                      {caffeineTotal} mg
+                    </span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <motion.div 
+                      className={getStatusColor()}
+                      initial={{ scaleX: 0 }}
+                      animate={{ scaleX: 1 }}
+                      transition={{ duration: 0.8, ease: "easeOut" }}
+                      style={{ originX: 0 }}
+                    >
+                      <Progress value={percentage} className="h-2" />
+                    </motion.div>
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>0 mg</span>
+                      <span>Recommended: {recommendedLimit} mg</span>
                     </div>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </div>
-        </>
+                    
+                    {percentage > 85 && (
+                      <motion.div 
+                        className="flex items-center gap-2 text-xs text-alert-high mt-2 bg-alert-high/10 p-2 rounded"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <AlertTriangle className="h-4 w-4" />
+                        <span>You're approaching your daily recommended limit</span>
+                      </motion.div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.4, delay: 0.1 }}
+            >
+              <CaffeineInsights />
+            </motion.div>
+
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+            >
+              <h2 className="font-medium text-muted-foreground mb-3 flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Today's Drinks
+              </h2>
+              
+              {entries.length === 0 ? (
+                <motion.div 
+                  className="text-center py-8 bg-muted/30 rounded-lg"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                >
+                  <p className="text-muted-foreground">No caffeine logged today.</p>
+                  <p className="text-sm mt-1">Track your first drink!</p>
+                </motion.div>
+              ) : (
+                <motion.div 
+                  className="space-y-3"
+                  initial="hidden"
+                  animate="visible"
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: { 
+                      opacity: 1,
+                      transition: { staggerChildren: 0.07 } 
+                    }
+                  }}
+                >
+                  {entries.map(entry => (
+                    <motion.div
+                      key={entry.id}
+                      variants={{
+                        hidden: { y: 20, opacity: 0 },
+                        visible: { y: 0, opacity: 1 }
+                      }}
+                    >
+                      <Card className="overflow-hidden border-coffee/10">
+                        <div className="flex items-center p-3">
+                          <div className="h-10 w-10 rounded-full bg-coffee/10 flex items-center justify-center mr-3">
+                            <Coffee className="h-5 w-5 text-coffee" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-medium">{entry.beverageName}</h3>
+                            <p className="text-xs text-muted-foreground">{entry.servingSize}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-medium">{entry.caffeineAmount} mg</p>
+                            <p className="text-xs text-muted-foreground">
+                              {formatTimeForDisplay(entry.date)}
+                            </p>
+                          </div>
+                        </div>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
       )}
     </div>
   );
