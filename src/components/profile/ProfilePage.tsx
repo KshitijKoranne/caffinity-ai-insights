@@ -11,6 +11,14 @@ import { LogOut, User, Settings, Save } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
+interface Profile {
+  id: string;
+  name: string | null;
+  email: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 const ProfilePage = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -25,7 +33,7 @@ const ProfilePage = () => {
       if (!user) return;
       
       try {
-        // Get profile data
+        // Get profile data using typed parameters
         const { data, error } = await supabase
           .from('profiles')
           .select('name, email')
@@ -57,6 +65,7 @@ const ProfilePage = () => {
     setIsSaving(true);
     
     try {
+      // Update profile with typed parameters
       const { error } = await supabase
         .from('profiles')
         .update({ name })
