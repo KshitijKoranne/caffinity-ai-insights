@@ -47,7 +47,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
 
       {/* Bottom navigation bar */}
       <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-2 z-10">
-        <div className="max-w-lg mx-auto flex items-center justify-between">
+        <div className="max-w-lg mx-auto grid grid-cols-3 items-center">
           <NavItem
             icon={<Coffee className="h-5 w-5" />}
             label="Today"
@@ -56,31 +56,33 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
             onClick={() => navigateTo("/dashboard")}
           />
           
-          <div className="relative -mt-8">
+          <div className="flex justify-center">
             <Button
               size={isMobile ? "default" : "lg"}
               onClick={() => navigateTo("/add")}
-              className="bg-coffee hover:bg-coffee-dark text-white rounded-full h-12 w-12 flex items-center justify-center shadow-lg"
+              className="bg-coffee hover:bg-coffee-dark text-white rounded-full h-12 w-12 flex items-center justify-center shadow-lg -mt-8"
             >
               <Plus className="h-5 w-5" />
             </Button>
           </div>
 
-          <NavItem
-            icon={<Package className="h-5 w-5" />}
-            label="Catalog"
-            path="/catalog"
-            isActive={currentPath === "/catalog"}
-            onClick={() => navigateTo("/catalog")}
-          />
+          <div className="flex justify-between space-x-1">
+            <NavItem
+              icon={<Package className="h-5 w-5" />}
+              label="Catalog"
+              path="/catalog"
+              isActive={currentPath === "/catalog"}
+              onClick={() => navigateTo("/catalog")}
+            />
 
-          <NavItem
-            icon={<User className="h-5 w-5" />}
-            label="Profile"
-            path="/profile"
-            isActive={currentPath === "/profile"}
-            onClick={() => navigateTo("/profile")}
-          />
+            <NavItem
+              icon={<User className="h-5 w-5" />}
+              label="Profile"
+              path="/profile"
+              isActive={currentPath === "/profile"}
+              onClick={() => navigateTo("/profile")}
+            />
+          </div>
         </div>
       </nav>
     </div>

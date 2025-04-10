@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -30,6 +31,27 @@ const Dashboard = () => {
     setRecommendedLimit(limit);
     setEntries(todayEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
     setLoading(false);
+  }, [currentDate]);
+
+  // Add a listener effect to update data when local storage changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const total = getDailyCaffeineTotal(currentDate);
+      const todayEntries = getCaffeineEntriesForDate(currentDate);
+      
+      setCaffeineTotal(total);
+      setEntries(todayEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Adding a custom event listener for updates from the same window
+    window.addEventListener('caffeine-updated', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('caffeine-updated', handleStorageChange);
+    };
   }, [currentDate]);
 
   const percentage = Math.min(Math.round((caffeineTotal / recommendedLimit) * 100), 100);

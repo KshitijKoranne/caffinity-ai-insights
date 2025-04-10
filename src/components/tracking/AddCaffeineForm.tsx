@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -42,6 +41,9 @@ const AddCaffeineForm = () => {
     
     // Save the entry
     saveCaffeineEntry(entry);
+    
+    // Dispatch a custom event to notify the dashboard
+    window.dispatchEvent(new CustomEvent('caffeine-updated'));
     
     // Show success message with note information if provided
     let description = `Added ${beverage.caffeine}mg from ${beverage.name}`;
