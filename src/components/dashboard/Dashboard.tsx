@@ -22,26 +22,52 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showNoteForEntry, setShowNoteForEntry] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadCaffeineData = () => {
+    console.log("Dashboard - Loading latest caffeine data for date:", currentDate);
     // Load caffeine data
     const total = getDailyCaffeineTotal(currentDate);
     const limit = getRecommendedCaffeineLimit();
     const todayEntries = getCaffeineEntriesForDate(currentDate);
     
+    console.log("Caffeine total:", total, "mg");
+    console.log("Entries found:", todayEntries.length);
+    
     setCaffeineTotal(total);
     setRecommendedLimit(limit);
     setEntries(todayEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+    console.log("Today's entries loaded:", todayEntries);
     setLoading(false);
+  };
+
+  useEffect(() => {
+    console.log("Dashboard component mounted, loading initial data");
+    loadCaffeineData();
+    
+    // Set up an event listener for storage changes
+    const handleStorageChange = () => {
+      loadCaffeineData();
+    };
+    
+    window.addEventListener("storage", handleStorageChange);
+    
+    // If we're using the same window, we need a custom event
+    window.addEventListener("caffeineDataUpdated", handleStorageChange);
+    
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("caffeineDataUpdated", handleStorageChange);
+    };
   }, [currentDate]);
 
   // Calculate percentage of recommended limit
   const percentage = Math.min(Math.round((caffeineTotal / recommendedLimit) * 100), 100);
+  console.log("Calculated caffeine total:", caffeineTotal, "mg");
   
   // Determine status color based on caffeine intake
   const getStatusColor = () => {
-    if (percentage < 50) return "bg-alert-low";
+    if (percentage < 50) return "bg-green-500";
     if (percentage < 85) return "bg-yellow-500";
-    return "bg-alert-high";
+    return "bg-red-500";
   };
 
   const toggleNote = (entryId: string) => {
@@ -96,22 +122,19 @@ const Dashboard = () => {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg flex items-center justify-between">
                     <span>Daily Caffeine Intake</span>
-                    <span className={`text-xl font-bold ${percentage > 85 ? "text-alert-high" : ""}`}>
+                    <span className={`text-xl font-bold ${percentage > 85 ? "text-red-500" : ""}`}>
                       {caffeineTotal} mg
                     </span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    <motion.div 
-                      className={getStatusColor()}
-                      initial={{ scaleX: 0 }}
-                      animate={{ scaleX: 1 }}
-                      transition={{ duration: 0.8, ease: "easeOut" }}
-                      style={{ originX: 0 }}
-                    >
-                      <Progress value={percentage} className="h-2" />
-                    </motion.div>
+                    <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-2 ${getStatusColor()}`} 
+                        style={{ width: `${percentage}%` }}
+                      />
+                    </div>
                     <div className="flex justify-between text-xs text-muted-foreground">
                       <span>0 mg</span>
                       <span>Recommended: {recommendedLimit} mg</span>
@@ -119,7 +142,7 @@ const Dashboard = () => {
                     
                     {percentage > 85 && (
                       <motion.div 
-                        className="flex items-center gap-2 text-xs text-alert-high mt-2 bg-alert-high/10 p-2 rounded"
+                        className="flex items-center gap-2 text-xs text-red-500 mt-2 bg-red-50 p-2 rounded"
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         transition={{ duration: 0.3 }}

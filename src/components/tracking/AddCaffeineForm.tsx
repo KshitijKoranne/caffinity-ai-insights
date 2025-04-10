@@ -43,11 +43,17 @@ const AddCaffeineForm = () => {
     // Save the entry
     saveCaffeineEntry(entry);
     
+    // Dispatch a custom event to notify the dashboard component
+    const event = new Event('caffeineDataUpdated');
+    window.dispatchEvent(event);
+    
     // Show success message with note information if provided
     let description = `Added ${beverage.caffeine}mg from ${beverage.name}`;
     if (notes.trim()) {
       description += ` with note: "${notes.trim()}"`;
     }
+    
+    console.log("Added new caffeine entry:", entry);
     
     toast({
       title: "Caffeine logged",

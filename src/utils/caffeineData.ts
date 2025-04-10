@@ -88,27 +88,59 @@ export const BEVERAGE_CATALOG: CaffeineBeverage[] = [
 // Get user's caffeine entries from local storage
 export const getCaffeineEntries = (): CaffeineEntry[] => {
   const entries = localStorage.getItem("caffinity-entries");
+  console.log("Raw entries from localStorage:", entries);
   return entries ? JSON.parse(entries) : [];
 };
 
 // Save caffeine entry
 export const saveCaffeineEntry = (entry: CaffeineEntry): void => {
   const entries = getCaffeineEntries();
+  console.log("Saving caffeine entry:", entry);
   entries.push(entry);
   localStorage.setItem("caffinity-entries", JSON.stringify(entries));
+  console.log("Caffeine entry saved successfully:", entry);
+  console.log("Total entries now:", entries.length);
+  console.log("All entries:", entries);
+};
+
+// Helper function to normalize dates for comparison (removing time part)
+const normalizeDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 };
 
 // Get daily caffeine total
 export const getDailyCaffeineTotal = (date: string): number => {
+  const normalizedTargetDate = normalizeDate(date);
+  console.log("Using normalized date for filtering:", normalizedTargetDate);
+  
   const entries = getCaffeineEntries();
-  const dailyEntries = entries.filter(entry => entry.date.startsWith(date));
+  const dailyEntries = entries.filter(entry => {
+    const entryDate = normalizeDate(entry.date);
+    const isMatch = entryDate === normalizedTargetDate;
+    console.log("Entry date:", entryDate, "Target:", normalizedTargetDate, "Match:", isMatch);
+    return isMatch;
+  });
+  
+  console.log("Found", dailyEntries.length, "entries for", normalizedTargetDate);
   return dailyEntries.reduce((total, entry) => total + entry.caffeineAmount, 0);
 };
 
 // Get caffeine entries for a specific date
 export const getCaffeineEntriesForDate = (date: string): CaffeineEntry[] => {
+  const normalizedTargetDate = normalizeDate(date);
+  console.log("Looking for entries on date:", normalizedTargetDate);
+  
   const entries = getCaffeineEntries();
-  return entries.filter(entry => entry.date.startsWith(date));
+  const filteredEntries = entries.filter(entry => {
+    const entryDate = normalizeDate(entry.date);
+    const isMatch = entryDate === normalizedTargetDate;
+    console.log("Entry date:", entryDate, "Target:", normalizedTargetDate, "Match:", isMatch);
+    return isMatch;
+  });
+  
+  console.log("Found", filteredEntries.length, "entries for", normalizedTargetDate);
+  return filteredEntries;
 };
 
 // Get recommended caffeine limit (general guideline is 400mg for adults)
