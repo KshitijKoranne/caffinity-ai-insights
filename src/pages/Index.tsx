@@ -2,17 +2,20 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthPage from "../components/auth/AuthPage";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     // Check if user is already logged in
-    const user = localStorage.getItem("caffinity-user");
-    if (user && JSON.parse(user).isLoggedIn) {
+    if (user && !loading) {
       navigate("/dashboard");
     }
-  }, [navigate]);
+  }, [user, loading, navigate]);
+
+  if (loading) return null;
 
   return <AuthPage />;
 };

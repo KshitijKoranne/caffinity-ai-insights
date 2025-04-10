@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,59 +8,85 @@ import { Label } from "@/components/ui/label";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { LogOut, User, Settings, Save } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const ProfilePage = () => {
-  const [name, setName] = useState(() => {
-    const user = localStorage.getItem("caffinity-user");
-    return user ? JSON.parse(user).name || "User" : "User";
-  });
-  
-  const [email, setEmail] = useState(() => {
-    const user = localStorage.getItem("caffinity-user");
-    return user ? JSON.parse(user).email || "" : "";
-  });
-  
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+  
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!user) return;
+      
+      try {
+        // Get profile data
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('name, email')
+          .eq('id', user.id)
+          .single();
+        
+        if (error) throw error;
+        
+        if (data) {
+          setName(data.name || "");
+          setEmail(user.email || "");
+        }
+      } catch (error: any) {
+        console.error('Error loading profile:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load profile data",
+          variant: "destructive",
+        });
+      }
+    };
+    
+    loadProfile();
+  }, [user, toast]);
 
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () => {
+    if (!user) return;
+    
     setIsSaving(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      // Update local storage
-      const user = localStorage.getItem("caffinity-user");
-      if (user) {
-        const userData = JSON.parse(user);
-        userData.name = name;
-        userData.email = email;
-        localStorage.setItem("caffinity-user", JSON.stringify(userData));
-      }
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ name })
+        .eq('id', user.id);
       
-      setIsSaving(false);
+      if (error) throw error;
+      
       setIsEditing(false);
-      
       toast({
         title: "Profile updated",
         description: "Your profile has been successfully updated.",
       });
-    }, 500);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update profile",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleLogout = () => {
-    // Clear user data
-    localStorage.removeItem("caffinity-user");
-    
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out.",
-    });
-    
-    // Navigate to login page
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate("/");
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   return (
@@ -116,8 +142,7 @@ const ProfilePage = () => {
               id="email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={!isEditing}
+              disabled={true} // Email can't be changed directly
             />
           </div>
           

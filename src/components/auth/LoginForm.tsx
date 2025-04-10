@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { Eye, EyeOff, Mail } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -14,23 +15,33 @@ const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { signIn } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate login - in a real app we would authenticate with backend
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: "Login successful",
-        description: "Welcome back to Caffinity!",
-      });
+    try {
+      const { error } = await signIn(email, password);
       
-      // In a real app, we would save the auth token
-      localStorage.setItem("caffinity-user", JSON.stringify({ email, isLoggedIn: true }));
-      navigate("/dashboard");
-    }, 1000);
+      if (error) {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to sign in. Please check your credentials.",
+          variant: "destructive",
+        });
+      } else {
+        navigate("/dashboard");
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

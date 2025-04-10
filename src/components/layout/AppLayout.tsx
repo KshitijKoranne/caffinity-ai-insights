@@ -3,6 +3,7 @@ import { ReactNode, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Home, Coffee, Book, User, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 type NavItem = {
   label: string;
@@ -14,14 +15,20 @@ type NavItem = {
 const AppLayout = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
 
   // Check authentication
   useEffect(() => {
-    const user = localStorage.getItem("caffinity-user");
-    if (!user) {
+    if (!loading && !user) {
       navigate("/");
     }
-  }, [navigate]);
+  }, [navigate, user, loading]);
+
+  // Don't render anything while checking auth
+  if (loading) return null;
+  
+  // Don't render if not authenticated
+  if (!user) return null;
 
   const navItems: NavItem[] = [
     {
