@@ -47,14 +47,16 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
 
       {/* Bottom navigation bar */}
       <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-2 z-10">
-        <div className="max-w-lg mx-auto grid grid-cols-3 items-center">
-          <NavItem
-            icon={<Coffee className="h-5 w-5" />}
-            label="Today"
-            path="/dashboard"
-            isActive={currentPath === "/dashboard"}
-            onClick={() => navigateTo("/dashboard")}
-          />
+        <div className="max-w-lg mx-auto grid grid-cols-3 gap-1 items-center">
+          <div className="flex justify-start">
+            <NavItem
+              icon={<Coffee className="h-5 w-5" />}
+              label="Today"
+              path="/dashboard"
+              isActive={currentPath === "/dashboard"}
+              onClick={() => navigateTo("/dashboard")}
+            />
+          </div>
           
           <div className="flex justify-center">
             <Button
@@ -66,7 +68,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
             </Button>
           </div>
 
-          <div className="flex justify-between space-x-1">
+          <div className="flex justify-end space-x-1">
             <NavItem
               icon={<Package className="h-5 w-5" />}
               label="Catalog"

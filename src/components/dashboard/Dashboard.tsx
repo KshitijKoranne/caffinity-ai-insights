@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CaffeineEntry, getDailyCaffeineTotal, getCaffeineEntriesForDate, getRecommendedCaffeineLimit } from "@/utils/caffeineData";
@@ -22,10 +22,15 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showNoteForEntry, setShowNoteForEntry] = useState<string | null>(null);
 
-  useEffect(() => {
+  // Function to load the latest data
+  const loadLatestData = useCallback(() => {
+    console.log("Loading latest caffeine data for date:", currentDate);
     const total = getDailyCaffeineTotal(currentDate);
     const limit = getRecommendedCaffeineLimit();
     const todayEntries = getCaffeineEntriesForDate(currentDate);
+    
+    console.log("Caffeine total:", total, "mg");
+    console.log("Entries found:", todayEntries.length);
     
     setCaffeineTotal(total);
     setRecommendedLimit(limit);
@@ -33,26 +38,36 @@ const Dashboard = () => {
     setLoading(false);
   }, [currentDate]);
 
-  // Add a listener effect to update data when local storage changes
+  // Initial data load
+  useEffect(() => {
+    loadLatestData();
+  }, [loadLatestData]);
+
+  // Listen for storage changes from other tabs
   useEffect(() => {
     const handleStorageChange = () => {
-      const total = getDailyCaffeineTotal(currentDate);
-      const todayEntries = getCaffeineEntriesForDate(currentDate);
-      
-      setCaffeineTotal(total);
-      setEntries(todayEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+      console.log("Storage changed, reloading data");
+      loadLatestData();
     };
 
     window.addEventListener('storage', handleStorageChange);
-    
-    // Adding a custom event listener for updates from the same window
-    window.addEventListener('caffeine-updated', handleStorageChange);
-    
     return () => {
       window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('caffeine-updated', handleStorageChange);
     };
-  }, [currentDate]);
+  }, [loadLatestData]);
+
+  // Listen for caffeine-updated custom event (within the same window)
+  useEffect(() => {
+    const handleCaffeineUpdated = () => {
+      console.log("Caffeine updated event received, reloading data");
+      loadLatestData();
+    };
+
+    window.addEventListener('caffeine-updated', handleCaffeineUpdated);
+    return () => {
+      window.removeEventListener('caffeine-updated', handleCaffeineUpdated);
+    };
+  }, [loadLatestData]);
 
   const percentage = Math.min(Math.round((caffeineTotal / recommendedLimit) * 100), 100);
   
