@@ -4,9 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CaffeineEntry, getDailyCaffeineTotal, getCaffeineEntriesForDate, getRecommendedCaffeineLimit } from "@/utils/caffeineData";
 import { formatDateForDisplay, formatTimeForDisplay, getCurrentDateYMD } from "@/utils/dateUtils";
-import { Coffee, TrendingUp, AlertTriangle } from "lucide-react";
+import { Coffee, TrendingUp, AlertTriangle, FileText } from "lucide-react";
 import CaffeineInsights from "../insights/CaffeineInsights";
 import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const Dashboard = () => {
   const [caffeineTotal, setCaffeineTotal] = useState(0);
@@ -14,6 +20,7 @@ const Dashboard = () => {
   const [entries, setEntries] = useState<CaffeineEntry[]>([]);
   const [currentDate, setCurrentDate] = useState(getCurrentDateYMD());
   const [loading, setLoading] = useState(true);
+  const [showNoteForEntry, setShowNoteForEntry] = useState<string | null>(null);
 
   useEffect(() => {
     // Load caffeine data
@@ -35,6 +42,14 @@ const Dashboard = () => {
     if (percentage < 50) return "bg-alert-low";
     if (percentage < 85) return "bg-yellow-500";
     return "bg-alert-high";
+  };
+
+  const toggleNote = (entryId: string) => {
+    if (showNoteForEntry === entryId) {
+      setShowNoteForEntry(null);
+    } else {
+      setShowNoteForEntry(entryId);
+    }
   };
 
   return (
@@ -175,12 +190,34 @@ const Dashboard = () => {
                           <div className="flex-1">
                             <h3 className="font-medium">{entry.beverageName}</h3>
                             <p className="text-xs text-muted-foreground">{entry.servingSize}</p>
+                            {showNoteForEntry === entry.id && entry.notes && (
+                              <p className="text-xs mt-2 bg-muted/30 p-2 rounded">
+                                {entry.notes}
+                              </p>
+                            )}
                           </div>
-                          <div className="text-right">
+                          <div className="text-right flex flex-col items-end">
                             <p className="font-medium">{entry.caffeineAmount} mg</p>
                             <p className="text-xs text-muted-foreground">
                               {formatTimeForDisplay(entry.date)}
                             </p>
+                            {entry.notes && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-6 w-6 mt-1" 
+                                    onClick={() => toggleNote(entry.id)}
+                                  >
+                                    <FileText className="h-3 w-3" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>View notes</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
                           </div>
                         </div>
                       </Card>

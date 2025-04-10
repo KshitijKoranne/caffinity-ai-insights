@@ -8,6 +8,7 @@ import Dashboard from "./components/dashboard/Dashboard";
 import AddCaffeineForm from "./components/tracking/AddCaffeineForm";
 import BeverageCatalog from "./components/catalog/BeverageCatalog";
 import ProfilePage from "./components/profile/ProfilePage";
+import CalendarView from "./components/calendar/CalendarView";
 import AppLayout from "./components/layout/AppLayout";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
@@ -40,6 +41,11 @@ const App = () => (
               <Route path="/add" element={
                 <AppLayout>
                   <AddCaffeineForm />
+                </AppLayout>
+              } />
+              <Route path="/calendar" element={
+                <AppLayout>
+                  <CalendarView />
                 </AppLayout>
               } />
               <Route path="/catalog" element={

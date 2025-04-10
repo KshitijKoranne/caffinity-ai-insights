@@ -1,128 +1,95 @@
 
-import { ReactNode, useEffect } from "react";
+import { ReactNode } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Coffee, Book, User, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useAuth } from "@/contexts/AuthContext";
-import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
-import { AnimatePresence, motion } from "framer-motion";
-import { useTheme } from "@/contexts/ThemeContext";
+import { Coffee, CalendarDays, Package, User, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import ThemeSwitcher from "@/components/ui/ThemeSwitcher";
 
-type NavItem = {
+type NavItemProps = {
+  icon: ReactNode;
   label: string;
-  href: string;
-  icon: React.ReactNode;
-  active?: boolean;
+  path: string;
+  isActive: boolean;
+  onClick: () => void;
 };
 
+const NavItem = ({ icon, label, isActive, onClick }: NavItemProps) => (
+  <Button
+    variant={isActive ? "secondary" : "ghost"}
+    className={`flex items-center gap-3 w-full justify-start ${
+      isActive ? "bg-coffee/10 hover:bg-coffee/20" : ""
+    }`}
+    onClick={onClick}
+  >
+    {icon}
+    <span>{label}</span>
+  </Button>
+);
+
 const AppLayout = ({ children }: { children: ReactNode }) => {
-  const location = useLocation();
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
-  const { theme } = useTheme();
+  const location = useLocation();
+  const currentPath = location.pathname;
 
-  // Check authentication
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate("/auth");
-    }
-  }, [navigate, user, loading]);
-
-  // Don't render anything while checking auth
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <motion.div 
-        animate={{ rotate: 360 }}
-        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-      >
-        <Coffee className="h-10 w-10 text-coffee" />
-      </motion.div>
-    </div>
-  );
-  
-  // Don't render if not authenticated
-  if (!user) return null;
-
-  const navItems: NavItem[] = [
-    {
-      label: "Dashboard",
-      href: "/dashboard",
-      icon: <Home className="h-6 w-6" />,
-      active: location.pathname === "/dashboard",
-    },
-    {
-      label: "Add",
-      href: "/add",
-      icon: <Plus className="h-6 w-6" />,
-      active: location.pathname === "/add",
-    },
-    {
-      label: "Catalog",
-      href: "/catalog",
-      icon: <Book className="h-6 w-6" />,
-      active: location.pathname === "/catalog",
-    },
-    {
-      label: "Profile",
-      href: "/profile",
-      icon: <User className="h-6 w-6" />,
-      active: location.pathname === "/profile",
-    },
-  ];
+  const navigateTo = (path: string) => {
+    navigate(path);
+  };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      {/* Header with theme switcher */}
-      <header className="sticky top-0 border-b border-border bg-background/80 backdrop-blur-sm z-10 py-3 px-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <Coffee className="h-6 w-6 text-coffee mr-2" />
-            <span className={`font-caffeinated ${theme === 'dark' ? 'text-[#FAFAFA]' : 'text-coffee-dark'}`}>Caffinity</span>
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Main content */}
+      <main className="flex-grow pb-16">{children}</main>
+
+      {/* Bottom navigation bar */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-2 z-10">
+        <div className="max-w-lg mx-auto flex items-center justify-between">
+          <NavItem
+            icon={<Coffee className="h-5 w-5" />}
+            label="Today"
+            path="/dashboard"
+            isActive={currentPath === "/dashboard"}
+            onClick={() => navigateTo("/dashboard")}
+          />
+          
+          <NavItem
+            icon={<CalendarDays className="h-5 w-5" />}
+            label="Calendar"
+            path="/calendar"
+            isActive={currentPath === "/calendar"}
+            onClick={() => navigateTo("/calendar")}
+          />
+
+          <div className="relative -mt-8">
+            <Button
+              size="lg"
+              onClick={() => navigateTo("/add")}
+              className="bg-coffee hover:bg-coffee-dark text-white rounded-full h-14 w-14 flex items-center justify-center shadow-lg"
+            >
+              <Plus className="h-6 w-6" />
+            </Button>
           </div>
+
+          <NavItem
+            icon={<Package className="h-5 w-5" />}
+            label="Catalog"
+            path="/catalog"
+            isActive={currentPath === "/catalog"}
+            onClick={() => navigateTo("/catalog")}
+          />
+
+          <NavItem
+            icon={<User className="h-5 w-5" />}
+            label="Profile"
+            path="/profile"
+            isActive={currentPath === "/profile"}
+            onClick={() => navigateTo("/profile")}
+          />
+        </div>
+        
+        {/* Theme switcher */}
+        <div className="absolute top-3 right-3">
           <ThemeSwitcher />
         </div>
-      </header>
-      
-      {/* Main content */}
-      <AnimatePresence mode="wait">
-        <motion.main 
-          key={location.pathname}
-          initial={{ opacity: 0, y: 5 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -5 }}
-          transition={{ duration: 0.2 }}
-          className="flex-1 pb-16"
-        >
-          {children}
-        </motion.main>
-      </AnimatePresence>
-
-      {/* Mobile navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-md border-t border-border h-16 flex items-center justify-around px-4 z-10">
-        {navItems.map((item) => (
-          <button
-            key={item.href}
-            onClick={() => navigate(item.href)}
-            className={cn(
-              "flex flex-col items-center justify-center space-y-1 w-16 h-full relative",
-              item.active
-                ? `${theme === 'dark' ? 'text-[#FAFAFA]' : 'text-coffee-dark'} font-medium`
-                : "text-muted-foreground hover:text-coffee-dark"
-            )}
-          >
-            {item.active && (
-              <motion.div
-                layoutId="activeTab"
-                className="absolute inset-0 bg-coffee/10 rounded-md"
-                transition={{ type: "spring", duration: 0.5 }}
-              />
-            )}
-            <div className="relative z-10 p-1.5">
-              {item.icon}
-            </div>
-            <span className="text-xs relative z-10">{item.label}</span>
-          </button>
-        ))}
       </nav>
     </div>
   );
