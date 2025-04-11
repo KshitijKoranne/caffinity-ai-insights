@@ -122,7 +122,7 @@ const Dashboard = () => {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg flex items-center justify-between">
                     <span>Daily Caffeine Intake</span>
-                    <span className={`text-xl font-bold ${percentage > 85 ? "text-red-500" : ""}`}>
+                    <span className={`text-xl font-bold ${caffeineTotal > recommendedLimit ? "text-red-500" : ""}`}>
                       {caffeineTotal} mg
                     </span>
                   </CardTitle>
@@ -140,7 +140,7 @@ const Dashboard = () => {
                       <span>Maximum: {recommendedLimit} mg/day</span>
                     </div>
                     
-                    {percentage > 85 && (
+                    {caffeineTotal > recommendedLimit ? (
                       <motion.div 
                         className="flex items-center gap-2 text-xs text-red-500 mt-2 bg-red-50 p-2 rounded"
                         initial={{ opacity: 0, height: 0 }}
@@ -148,9 +148,19 @@ const Dashboard = () => {
                         transition={{ duration: 0.3 }}
                       >
                         <AlertTriangle className="h-4 w-4" />
+                        <span>You've exceeded your daily recommended caffeine limit</span>
+                      </motion.div>
+                    ) : percentage > 85 ? (
+                      <motion.div 
+                        className="flex items-center gap-2 text-xs text-amber-500 mt-2 bg-amber-50 p-2 rounded"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <AlertTriangle className="h-4 w-4" />
                         <span>You're approaching your daily recommended limit</span>
                       </motion.div>
-                    )}
+                    ) : null}
                   </div>
                 </CardContent>
               </Card>

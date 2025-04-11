@@ -19,7 +19,7 @@ serve(async (req) => {
   }
   
   try {
-    const { user_id, timeframe = 'week' } = await req.json();
+    const { user_id, timeframe = 'week', dailyTotal, recommendedLimit } = await req.json();
     
     if (!user_id) {
       return new Response(
@@ -31,20 +31,131 @@ serve(async (req) => {
       );
     }
     
-    // Since the supabase database is not fully set up yet, we'll use the mock data
-    // In a real app, this would fetch data from the database
+    // If OpenAI API key is available, use it to generate personalized insights
+    if (openaiApiKey) {
+      console.log("Generating AI insights using OpenAI");
+      
+      // Create the prompt with the user's caffeine data
+      const prompt = `
+        I'm tracking a user's caffeine consumption. Here's their data:
+        - Current daily intake: ${dailyTotal || "Unknown"} mg
+        - Recommended daily limit: ${recommendedLimit || 400} mg
+        - Timeframe requested: ${timeframe}
+        
+        Based on this information, please provide:
+        1. A brief insight about their caffeine habits
+        2. 2-4 recommendations to help them manage their caffeine intake better
+        3. Any concerns based on their consumption pattern
+        
+        Format your response as a JSON object with the keys "insights", "recommendations" (array), and "concerns" (array).
+        Keep the insights concise and helpful. If they've exceeded their limit, emphasize moderation.
+      `;
+      
+      try {
+        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${openaiApiKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+              {
+                role: "user",
+                content: prompt
+              }
+            ],
+            temperature: 0.7,
+            max_tokens: 500
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+          console.error("OpenAI API error:", data.error);
+          throw new Error(data.error.message);
+        }
+        
+        // Extract the generated content
+        const content = data.choices[0].message.content;
+        
+        // Parse the JSON response from OpenAI
+        try {
+          // Some cleaning in case OpenAI returns markdown or extra text
+          const jsonContent = content
+            .replace(/```json/g, '')
+            .replace(/```/g, '')
+            .trim();
+            
+          const parsedContent = JSON.parse(jsonContent);
+          console.log("Successfully generated AI insights");
+          
+          return new Response(
+            JSON.stringify(parsedContent),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        } catch (jsonError) {
+          console.error("Failed to parse OpenAI response as JSON:", jsonError);
+          console.log("Raw content:", content);
+          throw new Error("Failed to parse AI response");
+        }
+      } catch (aiError) {
+        console.error("Error generating insights with AI:", aiError);
+        // Fall back to mock insights if AI fails
+      }
+    }
+    
+    // Fallback: Use rule-based insights if OpenAI is unavailable or fails
+    console.log("Using rule-based insights (fallback)");
+    
+    // Simple rule-based insights based on daily total
+    let insights, recommendations, concerns;
+    
+    if (!dailyTotal || dailyTotal === 0) {
+      insights = "No caffeine data recorded yet for today.";
+      recommendations = [
+        "Start tracking your caffeine intake regularly.",
+        "Try logging each drink as you consume it for accurate tracking."
+      ];
+      concerns = [];
+    } else if (dailyTotal > recommendedLimit) {
+      insights = `You've consumed ${dailyTotal}mg of caffeine today, which exceeds the recommended daily limit of ${recommendedLimit}mg.`;
+      recommendations = [
+        "Consider switching to decaffeinated options for the rest of the day.",
+        "Stay hydrated by drinking plenty of water.",
+        "Be mindful of potential effects on sleep quality tonight."
+      ];
+      concerns = [
+        "Exceeding the recommended caffeine limit may cause jitteriness, anxiety, or sleep disturbances.",
+        "High caffeine intake can increase heart rate and blood pressure temporarily."
+      ];
+    } else if (dailyTotal > recommendedLimit * 0.75) {
+      insights = `You're at ${dailyTotal}mg of caffeine today, which is approaching the recommended daily limit.`;
+      recommendations = [
+        "Consider lower-caffeine alternatives for your next drink.",
+        "Space out remaining caffeine intake throughout the day.",
+        "Stay hydrated with water alongside caffeinated beverages."
+      ];
+      concerns = [
+        "Consuming caffeine too late in the day may affect sleep quality."
+      ];
+    } else {
+      insights = `Your caffeine intake today (${dailyTotal}mg) is within the recommended daily limit.`;
+      recommendations = [
+        "Continue to space out your caffeine intake for consistent energy.",
+        "Remember to stay hydrated throughout the day.",
+        "Tracking patterns over time can help you optimize your caffeine consumption."
+      ];
+      concerns = [];
+    }
     
     return new Response(
       JSON.stringify({ 
-        insights: "Based on your recent caffeine consumption, you're maintaining moderate intake levels throughout the day.",
-        recommendations: [
-          "Try to space out your caffeine intake for consistent energy.",
-          "Consider herbal teas in the evening to avoid sleep disruption.",
-          "Stay hydrated by drinking water alongside caffeinated beverages."
-        ],
-        concerns: [
-          "Consuming caffeine too late in the day may affect sleep quality."
-        ]
+        insights,
+        recommendations,
+        concerns
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -57,7 +168,7 @@ serve(async (req) => {
         recommendations: ["Continue tracking your caffeine intake for future analysis."],
         concerns: []
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     );
   }
 });

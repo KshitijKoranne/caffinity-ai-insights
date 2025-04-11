@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Brain, RefreshCw, AlertTriangle, CheckCircle, Coffee } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getCaffeineEntriesForDate, getCurrentDateYMD } from "@/utils/dateUtils";
+import { getDailyCaffeineTotal, getRecommendedCaffeineLimit } from "@/utils/caffeineData";
 
 interface AIInsights {
   insights: string;
@@ -20,7 +21,7 @@ const CaffeineInsights = () => {
   const [loading, setLoading] = useState(false);
   const [hasEntries, setHasEntries] = useState(false);
   const { user } = useAuth();
-
+  
   useEffect(() => {
     // Check if user has any entries
     const entries = getCaffeineEntriesForDate(getCurrentDateYMD());
@@ -33,8 +34,16 @@ const CaffeineInsights = () => {
     setLoading(true);
     
     try {
+      // Get current caffeine data to send to the API
+      const dailyTotal = getDailyCaffeineTotal(getCurrentDateYMD());
+      const recommendedLimit = getRecommendedCaffeineLimit();
+      
       const { data, error } = await supabase.functions.invoke('caffeine-analysis', {
-        body: { user_id: user.id },
+        body: { 
+          user_id: user.id,
+          dailyTotal,
+          recommendedLimit
+        },
       });
       
       if (error) throw error;
