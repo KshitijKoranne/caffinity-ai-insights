@@ -3,7 +3,6 @@ import { ReactNode } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Coffee, Package, User, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
 
 type NavItemProps = {
   icon: ReactNode;
@@ -76,11 +75,6 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
             isActive={currentPath === "/profile"}
             onClick={() => navigateTo("/profile")}
           />
-        </div>
-        
-        {/* Theme switcher */}
-        <div className="absolute top-3 right-3">
-          <ThemeSwitcher />
         </div>
       </nav>
     </div>

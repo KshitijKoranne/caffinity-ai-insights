@@ -7,9 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { LogOut, User, Settings, Save } from "lucide-react";
+import { LogOut, User, Settings, Save, Moon, Sun } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface Profile {
   id: string;
@@ -27,6 +29,7 @@ const ProfilePage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   
   useEffect(() => {
     const loadProfile = async () => {
@@ -105,8 +108,11 @@ const ProfilePage = () => {
           <h1 className="text-2xl font-bold text-coffee-dark">Profile</h1>
           <p className="text-muted-foreground">Manage your account</p>
         </div>
-        <div className="h-10 w-10 rounded-full bg-coffee flex items-center justify-center">
-          <User className="h-5 w-5 text-white" />
+        <div className="flex items-center space-x-2">
+          <ThemeSwitcher />
+          <div className="h-10 w-10 rounded-full bg-coffee flex items-center justify-center">
+            <User className="h-5 w-5 text-white" />
+          </div>
         </div>
       </header>
 
@@ -187,8 +193,14 @@ const ProfilePage = () => {
           <CardTitle className="text-lg">App Settings</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-4 text-muted-foreground text-sm">
-            More settings coming soon.
+          <div className="py-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-medium">Theme</h3>
+                <p className="text-xs text-muted-foreground">Switch between light and dark mode</p>
+              </div>
+              <ThemeSwitcher />
+            </div>
           </div>
         </CardContent>
       </Card>
