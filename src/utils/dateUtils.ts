@@ -1,6 +1,6 @@
 
 import { format, parseISO, isToday, isYesterday, startOfDay } from "date-fns";
-import { getCaffeineEntriesForDate as getEntries, getCurrentDateYMD as getCurrentDate } from "@/utils/caffeineData";
+import { getCaffeineEntriesForDate as getEntries } from "@/utils/caffeineData";
 
 // Format a date to YYYY-MM-DD
 export const formatDateYMD = (date: Date): string => {
@@ -26,7 +26,7 @@ export const formatTimeForDisplay = (dateStr: string): string => {
 
 // Get current date in YYYY-MM-DD format
 export const getCurrentDateYMD = (): string => {
-  return getCurrentDate();
+  return formatDateYMD(new Date());
 };
 
 // Get start of day for a date string (YYYY-MM-DD)
