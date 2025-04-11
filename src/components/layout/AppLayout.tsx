@@ -1,7 +1,7 @@
 
 import { ReactNode } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Coffee, CalendarDays, Package, User, Plus } from "lucide-react";
+import { Coffee, Package, User, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
 
@@ -51,14 +51,6 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
             onClick={() => navigateTo("/dashboard")}
           />
           
-          <NavItem
-            icon={<CalendarDays className="h-5 w-5" />}
-            label="Calendar"
-            path="/calendar"
-            isActive={currentPath === "/calendar"}
-            onClick={() => navigateTo("/calendar")}
-          />
-
           <div className="relative -mt-8">
             <Button
               size="lg"
