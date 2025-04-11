@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Brain, RefreshCw, AlertTriangle, CheckCircle } from "lucide-react";
+import { Brain, RefreshCw, AlertTriangle, CheckCircle, Coffee } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { getCaffeineEntriesForDate, getCurrentDateYMD } from "@/utils/dateUtils";
 
 interface AIInsights {
   insights: string;
@@ -17,7 +18,14 @@ interface AIInsights {
 const CaffeineInsights = () => {
   const [insights, setInsights] = useState<AIInsights | null>(null);
   const [loading, setLoading] = useState(false);
+  const [hasEntries, setHasEntries] = useState(false);
   const { user } = useAuth();
+
+  useEffect(() => {
+    // Check if user has any entries
+    const entries = getCaffeineEntriesForDate(getCurrentDateYMD());
+    setHasEntries(entries.length > 0);
+  }, []);
 
   const fetchInsights = async () => {
     if (!user) return;
@@ -32,10 +40,6 @@ const CaffeineInsights = () => {
       if (error) throw error;
       
       setInsights(data);
-      toast({
-        title: "Insights updated",
-        description: "Your personalized caffeine insights have been refreshed.",
-      });
     } catch (error: any) {
       console.error('Error fetching insights:', error);
       toast({
@@ -49,8 +53,38 @@ const CaffeineInsights = () => {
   };
   
   useEffect(() => {
-    fetchInsights();
-  }, [user]);
+    if (hasEntries) {
+      fetchInsights();
+    }
+  }, [user, hasEntries]);
+
+  if (!hasEntries) {
+    return (
+      <Card className="border-coffee/20 overflow-hidden">
+        <CardHeader className="pb-2 flex flex-row items-center justify-between bg-coffee/5">
+          <div className="flex items-center gap-2">
+            <Brain className="h-5 w-5 text-coffee" />
+            <CardTitle className="text-lg">AI Caffeine Insights</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="flex flex-col items-center justify-center text-center space-y-3 py-6">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Coffee className="h-12 w-12 text-coffee/30 mb-2" />
+            </motion.div>
+            <h3 className="font-medium text-lg">No data yet</h3>
+            <p className="text-muted-foreground text-sm max-w-md">
+              Start tracking your caffeine intake to receive personalized AI insights and recommendations.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="border-coffee/20 overflow-hidden">
@@ -138,7 +172,7 @@ const CaffeineInsights = () => {
           </AnimatePresence>
         ) : (
           <div className="py-8 text-center">
-            <p className="text-muted-foreground">No insights available. Start tracking your caffeine to get personalized recommendations.</p>
+            <p className="text-muted-foreground">No insights available. Try refreshing to get personalized recommendations.</p>
           </div>
         )}
       </CardContent>

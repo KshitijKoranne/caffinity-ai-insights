@@ -137,7 +137,7 @@ const Dashboard = () => {
                     </div>
                     <div className="flex justify-between text-xs text-muted-foreground">
                       <span>0 mg</span>
-                      <span>Recommended: {recommendedLimit} mg</span>
+                      <span>Maximum: {recommendedLimit} mg/day</span>
                     </div>
                     
                     {percentage > 85 && (

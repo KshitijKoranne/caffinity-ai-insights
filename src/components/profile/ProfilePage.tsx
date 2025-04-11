@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -36,7 +35,6 @@ const ProfilePage = () => {
       if (!user) return;
       
       try {
-        // Get profile data using typed parameters
         const { data, error } = await supabase
           .from('profiles')
           .select('name, email')
@@ -68,7 +66,6 @@ const ProfilePage = () => {
     setIsSaving(true);
     
     try {
-      // Update profile with typed parameters
       const { error } = await supabase
         .from('profiles')
         .update({ name })
@@ -108,11 +105,8 @@ const ProfilePage = () => {
           <h1 className="text-2xl font-bold text-coffee-dark">Profile</h1>
           <p className="text-muted-foreground">Manage your account</p>
         </div>
-        <div className="flex items-center space-x-2">
-          <ThemeSwitcher />
-          <div className="h-10 w-10 rounded-full bg-coffee flex items-center justify-center">
-            <User className="h-5 w-5 text-white" />
-          </div>
+        <div className="h-10 w-10 rounded-full bg-coffee flex items-center justify-center">
+          <User className="h-5 w-5 text-white" />
         </div>
       </header>
 
@@ -157,7 +151,7 @@ const ProfilePage = () => {
               id="email"
               type="email"
               value={email}
-              disabled={true} // Email can't be changed directly
+              disabled={true}
             />
           </div>
           
