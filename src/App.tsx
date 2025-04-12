@@ -13,7 +13,6 @@ import Auth from "./pages/Auth";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Toaster } from "@/components/ui/toaster";
 
 // Create a new query client instance outside of component render
 const queryClient = new QueryClient();
@@ -21,11 +20,10 @@ const queryClient = new QueryClient();
 // Properly structured component with React root
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <BrowserRouter>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
           <AuthProvider>
-            {/* Move TooltipProvider inside the routes to ensure it's not rendered at the root level */}
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />
@@ -63,12 +61,10 @@ function App() {
               
               <Route path="*" element={<NotFound />} />
             </Routes>
-            {/* Add Toaster outside of routes but inside auth context */}
-            <Toaster />
           </AuthProvider>
-        </BrowserRouter>
-      </ThemeProvider>
-    </QueryClientProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
   );
 }
 
