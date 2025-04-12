@@ -12,27 +12,31 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  // Get initial theme function - extracted to ensure it doesn't run during rendering
-  const getInitialTheme = (): Theme => {
-    if (typeof window !== 'undefined') {
-      const storedTheme = localStorage.getItem('theme') as Theme | null;
-      if (storedTheme) {
-        return storedTheme;
-      }
-      
-      // Check system preference
-      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        return 'dark';
-      }
-    }
-    return 'light'; // Default theme
-  };
+  // Initialize with a function to avoid executing during SSR
+  const [theme, setThemeState] = useState<Theme>('light');
 
-  // Initialize state with a function to avoid executing during render
-  const [theme, setThemeState] = useState<Theme>(() => getInitialTheme());
-
-  // Apply theme class to document when it changes
+  // Apply theme class and store in localStorage when it changes
   useEffect(() => {
+    // Get initial theme from localStorage or system preference
+    const getInitialTheme = (): Theme => {
+      if (typeof window !== 'undefined') {
+        const storedTheme = localStorage.getItem('theme') as Theme | null;
+        if (storedTheme) {
+          return storedTheme;
+        }
+        
+        // Check system preference
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          return 'dark';
+        }
+      }
+      return 'light'; // Default theme
+    };
+    
+    // Set initial theme
+    setThemeState(getInitialTheme());
+    
+    // Apply theme class to document
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
