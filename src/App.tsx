@@ -15,12 +15,13 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { Toaster } from "@/components/ui/toaster";
 
+// Create a new query client instance outside of component render
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <BrowserRouter>
+  <BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
         <AuthProvider>
           <TooltipProvider>
             <Routes>
@@ -55,9 +56,9 @@ const App = () => (
             <Toaster />
           </TooltipProvider>
         </AuthProvider>
-      </BrowserRouter>
-    </ThemeProvider>
-  </QueryClientProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  </BrowserRouter>
 );
 
 export default App;
