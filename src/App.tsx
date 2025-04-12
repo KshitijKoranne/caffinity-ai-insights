@@ -13,6 +13,7 @@ import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { Toaster } from "@/components/ui/toaster";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,7 @@ const App = () => (
               
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <Toaster />
           </TooltipProvider>
         </AuthProvider>
       </ThemeProvider>
