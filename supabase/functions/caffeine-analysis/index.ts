@@ -8,7 +8,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+// Replace OpenAI with Gemini API key
+const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL');
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
@@ -31,9 +32,9 @@ serve(async (req) => {
       );
     }
     
-    // If OpenAI API key is available, use it to generate personalized insights
-    if (openaiApiKey) {
-      console.log("Generating AI insights using OpenAI");
+    // If Gemini API key is available, use it to generate personalized insights
+    if (geminiApiKey) {
+      console.log("Generating AI insights using Google Gemini");
       
       // Create the prompt with the user's caffeine data
       const prompt = `
@@ -52,62 +53,66 @@ serve(async (req) => {
       `;
       
       try {
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        // Use Gemini API for text generation
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`, {
           method: "POST",
           headers: {
-            "Authorization": `Bearer ${openaiApiKey}`,
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages: [
+            contents: [
               {
-                role: "user",
-                content: prompt
+                parts: [
+                  {
+                    text: prompt
+                  }
+                ]
               }
             ],
-            temperature: 0.7,
-            max_tokens: 500
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 500
+            }
           })
         });
         
         const data = await response.json();
         
         if (data.error) {
-          console.error("OpenAI API error:", data.error);
+          console.error("Gemini API error:", data.error);
           throw new Error(data.error.message);
         }
         
-        // Extract the generated content
-        const content = data.choices[0].message.content;
+        // Extract the generated content from Gemini response
+        const content = data.candidates[0].content.parts[0].text;
         
-        // Parse the JSON response from OpenAI
+        // Parse the JSON response from Gemini
         try {
-          // Some cleaning in case OpenAI returns markdown or extra text
+          // Some cleaning in case Gemini returns markdown or extra text
           const jsonContent = content
             .replace(/```json/g, '')
             .replace(/```/g, '')
             .trim();
             
           const parsedContent = JSON.parse(jsonContent);
-          console.log("Successfully generated AI insights");
+          console.log("Successfully generated AI insights with Gemini");
           
           return new Response(
             JSON.stringify(parsedContent),
             { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
         } catch (jsonError) {
-          console.error("Failed to parse OpenAI response as JSON:", jsonError);
+          console.error("Failed to parse Gemini response as JSON:", jsonError);
           console.log("Raw content:", content);
           throw new Error("Failed to parse AI response");
         }
       } catch (aiError) {
-        console.error("Error generating insights with AI:", aiError);
-        // Fall back to mock insights if AI fails
+        console.error("Error generating insights with Gemini AI:", aiError);
+        // Fall back to rule-based insights if AI fails
       }
     }
     
-    // Fallback: Use rule-based insights if OpenAI is unavailable or fails
+    // Fallback: Use rule-based insights if Gemini is unavailable or fails
     console.log("Using rule-based insights (fallback)");
     
     // Simple rule-based insights based on daily total
