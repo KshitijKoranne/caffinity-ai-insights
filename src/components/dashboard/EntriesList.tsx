@@ -9,6 +9,7 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
+  TooltipProvider,
 } from "@/components/ui/tooltip";
 import { useState } from "react";
 
@@ -36,7 +37,7 @@ const EntriesList = ({ entries, onEntryDelete, allowDelete = false }: EntriesLis
   };
 
   return (
-    <>
+    <TooltipProvider>
       {entries.length === 0 ? (
         <motion.div 
           className="text-center py-8 bg-muted/30 rounded-lg"
@@ -131,7 +132,7 @@ const EntriesList = ({ entries, onEntryDelete, allowDelete = false }: EntriesLis
           ))}
         </motion.div>
       )}
-    </>
+    </TooltipProvider>
   );
 };
 

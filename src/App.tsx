@@ -24,37 +24,38 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <AuthProvider>
-            <TooltipProvider>
-              <Routes>
-                <Route path="/" element={<Landing />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/login" element={<Index />} />
-                
-                {/* Protected Routes */}
-                <Route path="/dashboard" element={
-                  <AppLayout>
+            {/* Move TooltipProvider to wrap individual components that need tooltips */}
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/login" element={<Index />} />
+              
+              {/* Protected Routes */}
+              <Route path="/dashboard" element={
+                <AppLayout>
+                  <TooltipProvider>
                     <Dashboard />
-                  </AppLayout>
-                } />
-                <Route path="/add" element={
-                  <AppLayout>
-                    <AddCaffeineForm />
-                  </AppLayout>
-                } />
-                <Route path="/catalog" element={
-                  <AppLayout>
-                    <BeverageCatalog />
-                  </AppLayout>
-                } />
-                <Route path="/profile" element={
-                  <AppLayout>
-                    <ProfilePage />
-                  </AppLayout>
-                } />
-                
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </TooltipProvider>
+                  </TooltipProvider>
+                </AppLayout>
+              } />
+              <Route path="/add" element={
+                <AppLayout>
+                  <AddCaffeineForm />
+                </AppLayout>
+              } />
+              <Route path="/catalog" element={
+                <AppLayout>
+                  <BeverageCatalog />
+                </AppLayout>
+              } />
+              <Route path="/profile" element={
+                <AppLayout>
+                  <ProfilePage />
+                </AppLayout>
+              } />
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
           </AuthProvider>
         </ThemeProvider>
       </QueryClientProvider>
