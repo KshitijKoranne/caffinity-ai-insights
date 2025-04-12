@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,17 +7,32 @@ import {
   BEVERAGE_CATALOG, 
   CaffeineBeverage, 
   formatServingSizeWithUnit, 
-  getUserPreferences 
+  getUserPreferences,
+  UnitPreference 
 } from "@/utils/caffeineData";
 import { Coffee, Search, Beer, CupSoda, GlassWater } from "lucide-react";
 
 const BeverageCatalog = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
-  const { unitPreference } = getUserPreferences();
+  const [unitPreference, setUnitPreference] = useState<UnitPreference>("oz");
   
   // Get unique categories
   const categories = ["all", ...new Set(BEVERAGE_CATALOG.map(b => b.category))];
+  
+  // Load user preferences
+  useEffect(() => {
+    const loadPreferences = async () => {
+      try {
+        const prefs = await getUserPreferences();
+        setUnitPreference(prefs.unitPreference);
+      } catch (error) {
+        console.error("Error loading user preferences:", error);
+      }
+    };
+    
+    loadPreferences();
+  }, []);
   
   // Filter beverages based on search and category
   const filteredBeverages = BEVERAGE_CATALOG.filter(beverage => {

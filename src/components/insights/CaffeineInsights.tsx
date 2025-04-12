@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,9 +22,17 @@ const CaffeineInsights = () => {
   const { user } = useAuth();
   
   useEffect(() => {
-    // Check if user has any entries
-    const entries = getCaffeineEntriesForDate(getCurrentDateYMD());
-    setHasEntries(entries.length > 0);
+    const checkEntries = async () => {
+      try {
+        const entries = await getCaffeineEntriesForDate(getCurrentDateYMD());
+        setHasEntries(entries.length > 0);
+      } catch (error) {
+        console.error("Error checking entries:", error);
+        setHasEntries(false);
+      }
+    };
+    
+    checkEntries();
   }, []);
 
   const fetchInsights = async () => {
@@ -34,8 +41,7 @@ const CaffeineInsights = () => {
     setLoading(true);
     
     try {
-      // Get current caffeine data to send to the API
-      const dailyTotal = getDailyCaffeineTotal(getCurrentDateYMD());
+      const dailyTotal = await getDailyCaffeineTotal(getCurrentDateYMD());
       const recommendedLimit = getRecommendedCaffeineLimit();
       
       const { data, error } = await supabase.functions.invoke('caffeine-analysis', {
@@ -62,7 +68,7 @@ const CaffeineInsights = () => {
   };
   
   useEffect(() => {
-    if (hasEntries) {
+    if (hasEntries && user) {
       fetchInsights();
     }
   }, [user, hasEntries]);
