@@ -28,6 +28,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         
+        // Store current user ID in localStorage for data isolation
+        if (session?.user) {
+          localStorage.setItem("caffinity-current-user", session.user.id);
+        } else if (event === 'SIGNED_OUT') {
+          localStorage.removeItem("caffinity-current-user");
+        }
+        
         if (event === 'SIGNED_IN') {
           toast({
             title: "Logged in successfully",
@@ -46,6 +53,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      
+      // Store current user ID in localStorage for data isolation
+      if (session?.user) {
+        localStorage.setItem("caffinity-current-user", session.user.id);
+      }
+      
       setLoading(false);
     });
 
@@ -80,6 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    localStorage.removeItem("caffinity-current-user");
   };
 
   const value = {

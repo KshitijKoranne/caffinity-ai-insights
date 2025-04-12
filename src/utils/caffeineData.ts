@@ -17,6 +17,7 @@ export interface CaffeineEntry {
   servingSize: string;
   date: string; // ISO string
   notes?: string;
+  userId?: string; // Add userId to track which user created the entry
 }
 
 export type UnitPreference = "oz" | "ml" | "cup";
@@ -237,40 +238,45 @@ export const formatServingSizeWithUnit = (beverage: CaffeineBeverage, unit: Unit
 
 // User preferences
 export const getUserPreferences = (): {unitPreference: UnitPreference} => {
-  const prefsString = localStorage.getItem("caffinity-preferences");
+  const userId = localStorage.getItem("caffinity-current-user") || "anonymous";
+  const prefsString = localStorage.getItem(`caffinity-preferences-${userId}`);
   const defaultPrefs = { unitPreference: "oz" as UnitPreference };
   return prefsString ? JSON.parse(prefsString) : defaultPrefs;
 };
 
 export const saveUserPreferences = (prefs: {unitPreference: UnitPreference}): void => {
-  localStorage.setItem("caffinity-preferences", JSON.stringify(prefs));
-  console.log("User preferences saved:", prefs);
+  const userId = localStorage.getItem("caffinity-current-user") || "anonymous";
+  localStorage.setItem(`caffinity-preferences-${userId}`, JSON.stringify(prefs));
+  console.log(`User preferences saved for user ${userId}:`, prefs);
 };
 
 // Get user's caffeine entries from local storage
 export const getCaffeineEntries = (): CaffeineEntry[] => {
-  const entries = localStorage.getItem("caffinity-entries");
-  console.log("Raw entries from localStorage:", entries);
+  const userId = localStorage.getItem("caffinity-current-user") || "anonymous";
+  const entries = localStorage.getItem(`caffinity-entries-${userId}`);
+  console.log(`Raw entries from localStorage for user ${userId}:`, entries);
   return entries ? JSON.parse(entries) : [];
 };
 
 // Save caffeine entry
 export const saveCaffeineEntry = (entry: CaffeineEntry): void => {
+  const userId = localStorage.getItem("caffinity-current-user") || "anonymous";
   const entries = getCaffeineEntries();
-  console.log("Saving caffeine entry:", entry);
-  entries.push(entry);
-  localStorage.setItem("caffinity-entries", JSON.stringify(entries));
-  console.log("Caffeine entry saved successfully:", entry);
+  const entryWithUser = { ...entry, userId };
+  console.log(`Saving caffeine entry for user ${userId}:`, entryWithUser);
+  entries.push(entryWithUser);
+  localStorage.setItem(`caffinity-entries-${userId}`, JSON.stringify(entries));
+  console.log("Caffeine entry saved successfully:", entryWithUser);
   console.log("Total entries now:", entries.length);
-  console.log("All entries:", entries);
 };
 
 // Delete caffeine entry
 export const deleteCaffeineEntry = (entryId: string): void => {
+  const userId = localStorage.getItem("caffinity-current-user") || "anonymous";
   const entries = getCaffeineEntries();
-  console.log("Deleting caffeine entry with ID:", entryId);
+  console.log(`Deleting caffeine entry with ID: ${entryId} for user ${userId}`);
   const updatedEntries = entries.filter(entry => entry.id !== entryId);
-  localStorage.setItem("caffinity-entries", JSON.stringify(updatedEntries));
+  localStorage.setItem(`caffinity-entries-${userId}`, JSON.stringify(updatedEntries));
   console.log("Entry deleted successfully");
   console.log("Total entries now:", updatedEntries.length);
 };
