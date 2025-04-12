@@ -8,16 +8,29 @@ const normalizeDate = (dateString: string): string => {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 };
 
+// Get current user ID helper function
+const getCurrentUserId = async (): Promise<string | null> => {
+  const { data } = await supabase.auth.getUser();
+  return data?.user?.id || null;
+};
+
 // Get daily caffeine total from Supabase
 export const getDailyCaffeineTotal = async (date: string): Promise<number> => {
   const normalizedTargetDate = normalizeDate(date);
   console.log("Using normalized date for filtering:", normalizedTargetDate);
   
   try {
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      console.log('No user logged in, returning 0 for daily total');
+      return 0;
+    }
+    
     // Use PostgreSQL date functions to compare only the date part
     const { data, error } = await supabase
       .from('caffeine_entries')
       .select('caffeine_amount')
+      .eq('user_id', userId)
       .gte('date', `${normalizedTargetDate}T00:00:00`)
       .lt('date', `${normalizedTargetDate}T23:59:59`);
     
@@ -40,9 +53,16 @@ export const getCaffeineEntriesForDate = async (date: string): Promise<CaffeineE
   console.log("Looking for entries on date:", normalizedTargetDate);
   
   try {
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      console.log('No user logged in, returning empty entries list');
+      return [];
+    }
+    
     const { data, error } = await supabase
       .from('caffeine_entries')
       .select('*')
+      .eq('user_id', userId)
       .gte('date', `${normalizedTargetDate}T00:00:00`)
       .lt('date', `${normalizedTargetDate}T23:59:59`)
       .order('date', { ascending: false });
@@ -79,9 +99,16 @@ export const getRecommendedCaffeineLimit = (): number => {
 // Get unique dates with caffeine entries from Supabase
 export const getCaffeineHistoryDates = async (limit: number = 30): Promise<string[]> => {
   try {
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      console.log('No user logged in, returning empty history dates');
+      return [];
+    }
+    
     const { data, error } = await supabase
       .from('caffeine_entries')
       .select('date')
+      .eq('user_id', userId)
       .order('date', { ascending: false });
     
     if (error) {

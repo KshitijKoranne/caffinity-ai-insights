@@ -36,6 +36,13 @@ export const getCaffeineEntries = async (): Promise<CaffeineEntry[]> => {
 // Save caffeine entry to Supabase
 export const saveCaffeineEntry = async (entry: CaffeineEntry): Promise<void> => {
   try {
+    // Get the current user ID
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.error('No user logged in');
+      return;
+    }
+
     const { error } = await supabase
       .from('caffeine_entries')
       .insert({
@@ -45,7 +52,8 @@ export const saveCaffeineEntry = async (entry: CaffeineEntry): Promise<void> => 
         caffeine_amount: entry.caffeineAmount,
         serving_size: entry.servingSize,
         date: entry.date,
-        notes: entry.notes || null
+        notes: entry.notes || null,
+        user_id: user.id
       });
     
     if (error) {
