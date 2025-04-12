@@ -22,7 +22,7 @@ const NavItem = ({ icon, label, isActive, onClick }: NavItemProps) => (
     onClick={onClick}
   >
     {icon}
-    <span className="text-xs">{label}</span>
+    <span className="text-xs sm:text-sm">{label}</span>
   </Button>
 );
 
@@ -38,7 +38,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Main content */}
-      <main className="flex-grow pb-16">{children}</main>
+      <main className="flex-grow pb-16 overflow-x-hidden">{children}</main>
 
       {/* Floating Add Button */}
       <motion.div 
@@ -58,8 +58,8 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
       </motion.div>
 
       {/* Bottom navigation bar */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-2 z-10">
-        <div className="max-w-lg mx-auto flex items-center justify-between px-6">
+      <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-2 z-10 safe-area-bottom">
+        <div className="max-w-lg mx-auto flex items-center justify-between px-4 sm:px-6">
           <NavItem
             icon={<Coffee className="h-5 w-5" />}
             label="Today"

@@ -94,6 +94,23 @@
 
   body {
     @apply bg-background text-foreground transition-colors duration-300;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Fix text legibility in dark mode */
+  .dark h1, .dark h2, .dark h3, .dark p {
+    @apply text-foreground;
+  }
+}
+
+/* Improved mobile responsiveness */
+@layer utilities {
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0.5rem);
+  }
+  
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top, 0.5rem);
   }
 }
 

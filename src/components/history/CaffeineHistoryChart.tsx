@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -24,11 +24,13 @@ import {
   Dot,
 } from "recharts";
 import { CalendarDays } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const CaffeineHistoryChart = () => {
   const [days, setDays] = useState(7);
   const history = getCaffeineHistory(days);
   const recommendedLimit = getRecommendedCaffeineLimit();
+  const isMobile = useIsMobile();
   
   // Format data for the chart
   const chartData = history.map(item => ({
@@ -43,7 +45,7 @@ export const CaffeineHistoryChart = () => {
   
   return (
     <Card className="p-6">
-      <div className="mb-4 flex items-center justify-between">
+      <div className={`mb-4 flex ${isMobile ? 'flex-col gap-3' : 'items-center justify-between'}`}>
         <div>
           <h3 className="text-lg font-medium">Caffeine History</h3>
           <p className="text-muted-foreground text-sm">
@@ -82,7 +84,7 @@ export const CaffeineHistoryChart = () => {
           <p className="text-sm">Start tracking your caffeine intake</p>
         </div>
       ) : (
-        <div className="h-64">
+        <div className={`${isMobile ? 'h-72' : 'h-64'}`}>
           <ChartContainer
             config={{
               caffeine: {
@@ -98,33 +100,32 @@ export const CaffeineHistoryChart = () => {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart 
                 data={chartData}
-                margin={{ top: 10, right: 10, left: 10, bottom: 20 }}
+                margin={isMobile ? 
+                  { top: 10, right: 10, left: 0, bottom: 40 } : 
+                  { top: 10, right: 10, left: 10, bottom: 25 }}
               >
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis 
                   dataKey="display" 
-                  tick={{ fontSize: 12 }}
-                  tickLine={false}
+                  tick={{ fontSize: isMobile ? 10 : 12 }}
+                  tickLine={true}
                   axisLine={true}
-                  height={30}
+                  height={40}
+                  angle={isMobile ? -45 : 0}
+                  textAnchor={isMobile ? "end" : "middle"}
                 />
                 <YAxis 
                   unit=" mg" 
-                  tick={{ fontSize: 12 }}
-                  tickLine={false}
+                  tick={{ fontSize: isMobile ? 10 : 12 }}
+                  tickLine={true}
                   axisLine={true}
-                  width={50}
+                  width={isMobile ? 40 : 50}
                 />
                 <ReferenceLine 
                   y={recommendedLimit} 
                   stroke="rgba(220, 38, 38, 0.5)" 
                   strokeDasharray="3 3" 
-                  label={{ 
-                    value: "Limit", 
-                    position: "insideTopRight",
-                    fill: "rgba(220, 38, 38, 0.8)",
-                    fontSize: 12
-                  }} 
+                  label={null} // Removed the label that showed "Limit"
                 />
                 <Line 
                   type="monotone"
@@ -134,13 +135,13 @@ export const CaffeineHistoryChart = () => {
                   dot={(props) => (
                     <Dot
                       {...props}
-                      r={4}
+                      r={isMobile ? 3 : 4}
                       fill="hsl(25, 70%, 45%)"
                       stroke="white"
                       strokeWidth={1}
                     />
                   )}
-                  activeDot={{ r: 6, fill: "hsl(25, 70%, 45%)", stroke: "white", strokeWidth: 2 }}
+                  activeDot={{ r: isMobile ? 5 : 6, fill: "hsl(25, 70%, 45%)", stroke: "white", strokeWidth: 2 }}
                 />
                 <ChartTooltip 
                   cursor={{ stroke: 'rgba(0, 0, 0, 0.15)', strokeDasharray: '5 5' }}

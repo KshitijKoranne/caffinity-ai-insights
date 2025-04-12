@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { CaffeineEntry, getDailyCaffeineTotal, getCaffeineEntriesForDate, getRecommendedCaffeineLimit, deleteCaffeineEntry } from "@/utils/caffeineData";
 import { getCurrentDateYMD } from "@/utils/dateUtils";
@@ -6,6 +5,7 @@ import { Coffee } from "lucide-react";
 import { motion } from "framer-motion";
 import DateNavigation from "./DateNavigation";
 import DashboardTabs from "./DashboardTabs";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Dashboard = () => {
   const [caffeineTotal, setCaffeineTotal] = useState(0);
@@ -14,6 +14,7 @@ const Dashboard = () => {
   const [currentDate, setCurrentDate] = useState(getCurrentDateYMD());
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"today" | "history">("today");
+  const { user } = useAuth();
 
   // Get greeting based on time of day
   const getGreeting = () => {
@@ -23,8 +24,8 @@ const Dashboard = () => {
     return "Good Evening";
   };
   
-  // User's name - in a real app this would come from a user profile
-  const userName = "Coffee Lover";
+  // Get user's name from auth context
+  const userName = user?.user_metadata?.name || "User";
 
   const loadCaffeineData = () => {
     console.log("Dashboard - Loading latest caffeine data for date:", currentDate);
