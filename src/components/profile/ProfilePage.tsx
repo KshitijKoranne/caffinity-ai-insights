@@ -1,9 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { LogOut, User, Settings, Save, Moon, Sun } from "lucide-react";
@@ -11,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
 import { useTheme } from "@/contexts/ThemeContext";
+import { UnitPreference, getUserPreferences, saveUserPreferences } from "@/utils/caffeineData";
 
 interface Profile {
   id: string;
@@ -25,6 +28,7 @@ const ProfilePage = () => {
   const [email, setEmail] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [unitPreference, setUnitPreference] = useState<UnitPreference>("oz");
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
@@ -55,6 +59,10 @@ const ProfilePage = () => {
           variant: "destructive",
         });
       }
+      
+      // Load user preferences
+      const { unitPreference: savedUnit } = getUserPreferences();
+      setUnitPreference(savedUnit);
     };
     
     loadProfile();
@@ -87,6 +95,16 @@ const ProfilePage = () => {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleUnitPreferenceChange = (value: UnitPreference) => {
+    setUnitPreference(value);
+    saveUserPreferences({ unitPreference: value });
+    
+    toast({
+      title: "Preference updated",
+      description: `Serving size unit changed to ${value}`,
+    });
   };
 
   const handleLogout = async () => {
@@ -187,13 +205,37 @@ const ProfilePage = () => {
           <CardTitle className="text-lg">App Settings</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-medium">Theme</h3>
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-sm font-medium mb-2">Theme</h3>
+              <div className="flex items-center justify-between">
                 <p className="text-xs text-muted-foreground">Switch between light and dark mode</p>
+                <ThemeSwitcher />
               </div>
-              <ThemeSwitcher />
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Serving Size Units</h3>
+              <p className="text-xs text-muted-foreground mb-2">Choose your preferred unit for beverage serving sizes</p>
+              
+              <RadioGroup 
+                value={unitPreference} 
+                onValueChange={(value) => handleUnitPreferenceChange(value as UnitPreference)}
+                className="flex flex-col space-y-1"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="oz" id="oz" />
+                  <Label htmlFor="oz">Ounces (oz)</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="ml" id="ml" />
+                  <Label htmlFor="ml">Milliliters (ml)</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="cup" id="cup" />
+                  <Label htmlFor="cup">Cups</Label>
+                </div>
+              </RadioGroup>
             </div>
           </div>
         </CardContent>

@@ -3,12 +3,18 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BEVERAGE_CATALOG, CaffeineBeverage } from "@/utils/caffeineData";
-import { Coffee, Search } from "lucide-react";
+import { 
+  BEVERAGE_CATALOG, 
+  CaffeineBeverage, 
+  formatServingSizeWithUnit, 
+  getUserPreferences 
+} from "@/utils/caffeineData";
+import { Coffee, Search, Beer, Cup, GlassWater } from "lucide-react";
 
 const BeverageCatalog = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
+  const { unitPreference } = getUserPreferences();
   
   // Get unique categories
   const categories = ["all", ...new Set(BEVERAGE_CATALOG.map(b => b.category))];
@@ -19,6 +25,22 @@ const BeverageCatalog = () => {
     const matchesCategory = activeCategory === "all" || beverage.category === activeCategory;
     return matchesSearch && matchesCategory;
   });
+
+  // Get category icon
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case "coffee":
+        return <Coffee className="h-4 w-4" />;
+      case "tea":
+        return <Cup className="h-4 w-4" />;
+      case "energy":
+        return <GlassWater className="h-4 w-4" />;
+      case "soda":
+        return <Beer className="h-4 w-4" />;
+      default:
+        return <Coffee className="h-4 w-4" />;
+    }
+  };
 
   return (
     <div className="p-4 space-y-6 pb-20">
@@ -57,8 +79,9 @@ const BeverageCatalog = () => {
             <TabsTrigger 
               key={category} 
               value={category}
-              className="capitalize"
+              className="capitalize flex items-center gap-1"
             >
+              {category !== "all" && getCategoryIcon(category)}
               {category}
             </TabsTrigger>
           ))}
@@ -74,7 +97,7 @@ const BeverageCatalog = () => {
           </div>
         ) : (
           filteredBeverages.map((beverage) => (
-            <BeverageCard key={beverage.id} beverage={beverage} />
+            <BeverageCard key={beverage.id} beverage={beverage} unitPreference={unitPreference} />
           ))
         )}
       </div>
@@ -82,13 +105,35 @@ const BeverageCatalog = () => {
   );
 };
 
-const BeverageCard = ({ beverage }: { beverage: CaffeineBeverage }) => {
+const BeverageCard = ({ 
+  beverage, 
+  unitPreference 
+}: { 
+  beverage: CaffeineBeverage;
+  unitPreference: "oz" | "ml" | "cup";
+}) => {
+  // Get icon based on category
+  const getCategoryIcon = () => {
+    switch (beverage.category) {
+      case "coffee":
+        return <Coffee className="h-5 w-5 text-coffee" />;
+      case "tea":
+        return <Cup className="h-5 w-5 text-coffee" />;
+      case "energy":
+        return <GlassWater className="h-5 w-5 text-coffee" />;
+      case "soda":
+        return <Beer className="h-5 w-5 text-coffee" />;
+      default:
+        return <Coffee className="h-5 w-5 text-coffee" />;
+    }
+  };
+  
   return (
     <Card className="overflow-hidden border-coffee/10">
       <CardContent className="p-3">
         <div className="flex items-center">
           <div className="h-10 w-10 rounded-full bg-coffee/10 flex items-center justify-center mr-3">
-            <Coffee className="h-5 w-5 text-coffee" />
+            {getCategoryIcon()}
           </div>
           <div className="flex-1">
             <h3 className="font-medium">{beverage.name}</h3>
@@ -97,7 +142,9 @@ const BeverageCard = ({ beverage }: { beverage: CaffeineBeverage }) => {
           <div className="text-right">
             <p className="font-medium">{beverage.caffeine} mg</p>
             <p className="text-xs text-muted-foreground">
-              {beverage.servingSize}
+              {beverage.servingSizeOz 
+                ? formatServingSizeWithUnit(beverage, unitPreference)
+                : beverage.servingSize}
             </p>
           </div>
         </div>

@@ -8,8 +8,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { saveCaffeineEntry, BEVERAGE_CATALOG } from "@/utils/caffeineData";
-import { getCurrentDateYMD } from "@/utils/dateUtils";
+import { 
+  saveCaffeineEntry, 
+  BEVERAGE_CATALOG,
+  getUserPreferences,
+  formatServingSizeWithUnit
+} from "@/utils/caffeineData";
 import { Coffee, ArrowLeft } from "lucide-react";
 
 const AddCaffeineForm = () => {
@@ -18,6 +22,7 @@ const AddCaffeineForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { unitPreference } = getUserPreferences();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,7 +119,13 @@ const AddCaffeineForm = () => {
                 <div className="flex justify-between">
                   <span className="text-sm">Serving size:</span>
                   <span className="text-sm font-medium">
-                    {BEVERAGE_CATALOG.find(b => b.id === selectedBeverage)?.servingSize}
+                    {(() => {
+                      const beverage = BEVERAGE_CATALOG.find(b => b.id === selectedBeverage);
+                      if (!beverage) return "";
+                      return beverage.servingSizeOz
+                        ? formatServingSizeWithUnit(beverage, unitPreference)
+                        : beverage.servingSize;
+                    })()}
                   </span>
                 </div>
                 <div className="flex justify-between mt-1">
