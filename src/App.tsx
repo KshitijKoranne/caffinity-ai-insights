@@ -13,6 +13,7 @@ import Auth from "./pages/Auth";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/toaster";
 
 // Create a new query client instance outside of component render
 const queryClient = new QueryClient();
@@ -24,37 +25,46 @@ function App() {
       <ThemeProvider>
         <BrowserRouter>
           <AuthProvider>
-            <TooltipProvider>
-              <Routes>
-                <Route path="/" element={<Landing />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/login" element={<Index />} />
-                
-                {/* Protected Routes */}
-                <Route path="/dashboard" element={
-                  <AppLayout>
+            {/* Move TooltipProvider inside the routes to ensure it's not rendered at the root level */}
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/login" element={<Index />} />
+              
+              {/* Protected Routes */}
+              <Route path="/dashboard" element={
+                <AppLayout>
+                  <TooltipProvider>
                     <Dashboard />
-                  </AppLayout>
-                } />
-                <Route path="/add" element={
-                  <AppLayout>
+                  </TooltipProvider>
+                </AppLayout>
+              } />
+              <Route path="/add" element={
+                <AppLayout>
+                  <TooltipProvider>
                     <AddCaffeineForm />
-                  </AppLayout>
-                } />
-                <Route path="/catalog" element={
-                  <AppLayout>
+                  </TooltipProvider>
+                </AppLayout>
+              } />
+              <Route path="/catalog" element={
+                <AppLayout>
+                  <TooltipProvider>
                     <BeverageCatalog />
-                  </AppLayout>
-                } />
-                <Route path="/profile" element={
-                  <AppLayout>
+                  </TooltipProvider>
+                </AppLayout>
+              } />
+              <Route path="/profile" element={
+                <AppLayout>
+                  <TooltipProvider>
                     <ProfilePage />
-                  </AppLayout>
-                } />
-                
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </TooltipProvider>
+                  </TooltipProvider>
+                </AppLayout>
+              } />
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            {/* Add Toaster outside of routes but inside auth context */}
+            <Toaster />
           </AuthProvider>
         </BrowserRouter>
       </ThemeProvider>
