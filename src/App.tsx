@@ -17,11 +17,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 // Create a new query client instance outside of component render
 const queryClient = new QueryClient();
 
-// Create a wrapper component for TooltipProvider to ensure it's used within React's rendering lifecycle
-const TooltipWrapper = ({ children }) => {
-  return <TooltipProvider>{children}</TooltipProvider>;
-};
-
 // Properly structured component with React root
 function App() {
   return (
@@ -29,37 +24,37 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <AuthProvider>
-            <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/login" element={<Index />} />
-              
-              {/* Protected Routes - Apply TooltipProvider only where needed */}
-              <Route path="/dashboard" element={
-                <AppLayout>
-                  <TooltipWrapper>
+            <TooltipProvider>
+              <Routes>
+                <Route path="/" element={<Landing />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/login" element={<Index />} />
+                
+                {/* Protected Routes */}
+                <Route path="/dashboard" element={
+                  <AppLayout>
                     <Dashboard />
-                  </TooltipWrapper>
-                </AppLayout>
-              } />
-              <Route path="/add" element={
-                <AppLayout>
-                  <AddCaffeineForm />
-                </AppLayout>
-              } />
-              <Route path="/catalog" element={
-                <AppLayout>
-                  <BeverageCatalog />
-                </AppLayout>
-              } />
-              <Route path="/profile" element={
-                <AppLayout>
-                  <ProfilePage />
-                </AppLayout>
-              } />
-              
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+                  </AppLayout>
+                } />
+                <Route path="/add" element={
+                  <AppLayout>
+                    <AddCaffeineForm />
+                  </AppLayout>
+                } />
+                <Route path="/catalog" element={
+                  <AppLayout>
+                    <BeverageCatalog />
+                  </AppLayout>
+                } />
+                <Route path="/profile" element={
+                  <AppLayout>
+                    <ProfilePage />
+                  </AppLayout>
+                } />
+                
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </TooltipProvider>
           </AuthProvider>
         </ThemeProvider>
       </QueryClientProvider>
