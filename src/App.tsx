@@ -18,9 +18,9 @@ import { Toaster } from "@/components/ui/toaster";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <BrowserRouter>
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
+  <QueryClientProvider client={queryClient}>
+    <ThemeProvider>
+      <BrowserRouter>
         <AuthProvider>
           <TooltipProvider>
             <Routes>
@@ -55,9 +55,9 @@ const App = () => (
             <Toaster />
           </TooltipProvider>
         </AuthProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
-  </BrowserRouter>
+      </BrowserRouter>
+    </ThemeProvider>
+  </QueryClientProvider>
 );
 
 export default App;
