@@ -2,6 +2,9 @@
 import { format, parseISO, isToday, isYesterday, startOfDay, subDays } from "date-fns";
 import { getCaffeineEntriesForDate as getEntries } from "@/utils/caffeineData";
 
+// Export isToday and isYesterday from date-fns
+export { isToday, isYesterday } from "date-fns";
+
 // Format a date to YYYY-MM-DD
 export const formatDateYMD = (date: Date): string => {
   return format(date, "yyyy-MM-dd");
