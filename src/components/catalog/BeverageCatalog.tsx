@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,7 +8,7 @@ import {
   formatServingSizeWithUnit, 
   getUserPreferences 
 } from "@/utils/caffeineData";
-import { Coffee, Search, Beer, Cup, GlassWater } from "lucide-react";
+import { Coffee, Search, Beer, CupSoda, GlassWater } from "lucide-react";
 
 const BeverageCatalog = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -32,7 +31,7 @@ const BeverageCatalog = () => {
       case "coffee":
         return <Coffee className="h-4 w-4" />;
       case "tea":
-        return <Cup className="h-4 w-4" />;
+        return <CupSoda className="h-4 w-4" />;
       case "energy":
         return <GlassWater className="h-4 w-4" />;
       case "soda":
@@ -118,7 +117,7 @@ const BeverageCard = ({
       case "coffee":
         return <Coffee className="h-5 w-5 text-coffee" />;
       case "tea":
-        return <Cup className="h-5 w-5 text-coffee" />;
+        return <CupSoda className="h-5 w-5 text-coffee" />;
       case "energy":
         return <GlassWater className="h-5 w-5 text-coffee" />;
       case "soda":
