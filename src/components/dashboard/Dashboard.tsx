@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import DateNavigation from "./DateNavigation";
 import DashboardTabs from "./DashboardTabs";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
   const [caffeineTotal, setCaffeineTotal] = useState(0);
@@ -16,6 +17,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"today" | "history">("today");
   const { user } = useAuth();
+  const { toast } = useToast();
 
   // Get greeting based on time of day
   const getGreeting = () => {
@@ -28,54 +30,81 @@ const Dashboard = () => {
   // Get user's name from auth context
   const userName = user?.user_metadata?.name || "User";
 
-  const loadCaffeineData = () => {
-    console.log("Dashboard - Loading latest caffeine data for date:", currentDate);
-    // Load caffeine data
-    const total = getDailyCaffeineTotal(currentDate);
-    const limit = getRecommendedCaffeineLimit();
-    const todayEntries = getCaffeineEntriesForDate(currentDate);
-    
-    console.log("Caffeine total:", total, "mg");
-    console.log("Entries found:", todayEntries.length);
-    
-    setCaffeineTotal(total);
-    setRecommendedLimit(limit);
-    setEntries(todayEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
-    console.log("Today's entries loaded:", todayEntries);
-    setLoading(false);
+  const loadCaffeineData = async () => {
+    try {
+      console.log("Dashboard - Loading latest caffeine data for date:", currentDate);
+      setLoading(true);
+      
+      // Load caffeine data
+      const total = await getDailyCaffeineTotal(currentDate);
+      const limit = getRecommendedCaffeineLimit();
+      const todayEntries = await getCaffeineEntriesForDate(currentDate);
+      
+      console.log("Caffeine total:", total, "mg");
+      console.log("Entries found:", todayEntries.length);
+      
+      setCaffeineTotal(total);
+      setRecommendedLimit(limit);
+      setEntries(todayEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+      console.log("Today's entries loaded:", todayEntries);
+    } catch (error) {
+      console.error("Error loading caffeine data:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load your caffeine data.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
+    if (!user) {
+      console.log("Dashboard: No user logged in, redirecting or showing login prompt");
+      return;
+    }
+    
     console.log("Dashboard component mounted, loading initial data");
     loadCaffeineData();
     
     // Set up an event listener for storage changes
-    const handleStorageChange = () => {
+    const handleDataUpdated = () => {
       loadCaffeineData();
     };
     
-    window.addEventListener("storage", handleStorageChange);
-    
-    // If we're using the same window, we need a custom event
-    window.addEventListener("caffeineDataUpdated", handleStorageChange);
+    window.addEventListener("caffeineDataUpdated", handleDataUpdated);
     
     return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("caffeineDataUpdated", handleStorageChange);
+      window.removeEventListener("caffeineDataUpdated", handleDataUpdated);
     };
-  }, [currentDate]);
+  }, [currentDate, user]);
 
   const handleDateChange = (date: string) => {
     setCurrentDate(date);
   };
 
   // Handle entry deletion
-  const handleDeleteEntry = (entryId: string) => {
-    deleteCaffeineEntry(entryId);
-    loadCaffeineData();
-    
-    // Dispatch event to update other components
-    window.dispatchEvent(new Event("caffeineDataUpdated"));
+  const handleDeleteEntry = async (entryId: string) => {
+    try {
+      await deleteCaffeineEntry(entryId);
+      await loadCaffeineData();
+      
+      // Dispatch event to update other components
+      window.dispatchEvent(new Event("caffeineDataUpdated"));
+      
+      toast({
+        title: "Entry deleted",
+        description: "Caffeine entry was successfully removed.",
+      });
+    } catch (error) {
+      console.error("Error deleting entry:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete the entry.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Calculate percentage of recommended limit
@@ -86,7 +115,7 @@ const Dashboard = () => {
     <div className="p-4 space-y-6 pb-20">
       <header className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold text-foreground">{getGreeting()}, {userName}</h1>
+          <h1 className="text-lg font-bold text-foreground">{getGreeting()}, {userName}</h1>
           <p className="text-muted-foreground text-sm">
             {currentDate === getCurrentDateYMD() ? "Today" : ""}
           </p>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { LogOut, User, Settings, Save, Moon, Sun } from "lucide-react";
+import { LogOut, User, Settings, Save } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
@@ -29,6 +28,7 @@ const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [unitPreference, setUnitPreference] = useState<UnitPreference>("oz");
+  const [isLoadingPreferences, setIsLoadingPreferences] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
@@ -61,8 +61,15 @@ const ProfilePage = () => {
       }
       
       // Load user preferences
-      const { unitPreference: savedUnit } = getUserPreferences();
-      setUnitPreference(savedUnit);
+      try {
+        setIsLoadingPreferences(true);
+        const { unitPreference: savedUnit } = await getUserPreferences();
+        setUnitPreference(savedUnit);
+      } catch (error) {
+        console.error('Error loading user preferences:', error);
+      } finally {
+        setIsLoadingPreferences(false);
+      }
     };
     
     loadProfile();
@@ -97,14 +104,23 @@ const ProfilePage = () => {
     }
   };
 
-  const handleUnitPreferenceChange = (value: UnitPreference) => {
-    setUnitPreference(value);
-    saveUserPreferences({ unitPreference: value });
-    
-    toast({
-      title: "Preference updated",
-      description: `Serving size unit changed to ${value}`,
-    });
+  const handleUnitPreferenceChange = async (value: UnitPreference) => {
+    try {
+      setUnitPreference(value);
+      await saveUserPreferences({ unitPreference: value });
+      
+      toast({
+        title: "Preference updated",
+        description: `Serving size unit changed to ${value}`,
+      });
+    } catch (error) {
+      console.error('Error saving unit preference:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save unit preference",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleLogout = async () => {
@@ -218,24 +234,28 @@ const ProfilePage = () => {
               <h3 className="text-sm font-medium">Serving Size Units</h3>
               <p className="text-xs text-muted-foreground mb-2">Choose your preferred unit for beverage serving sizes</p>
               
-              <RadioGroup 
-                value={unitPreference} 
-                onValueChange={(value) => handleUnitPreferenceChange(value as UnitPreference)}
-                className="flex flex-col space-y-1"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="oz" id="oz" />
-                  <Label htmlFor="oz">Ounces (oz)</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="ml" id="ml" />
-                  <Label htmlFor="ml">Milliliters (ml)</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="cup" id="cup" />
-                  <Label htmlFor="cup">Cups</Label>
-                </div>
-              </RadioGroup>
+              {isLoadingPreferences ? (
+                <div className="text-sm text-muted-foreground">Loading preferences...</div>
+              ) : (
+                <RadioGroup 
+                  value={unitPreference} 
+                  onValueChange={(value) => handleUnitPreferenceChange(value as UnitPreference)}
+                  className="flex flex-col space-y-1"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="oz" id="oz" />
+                    <Label htmlFor="oz">Ounces (oz)</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="ml" id="ml" />
+                    <Label htmlFor="ml">Milliliters (ml)</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="cup" id="cup" />
+                    <Label htmlFor="cup">Cups</Label>
+                  </div>
+                </RadioGroup>
+              )}
             </div>
           </div>
         </CardContent>

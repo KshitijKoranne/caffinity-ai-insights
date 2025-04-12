@@ -9,6 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      caffeine_entries: {
+        Row: {
+          beverage_id: string
+          beverage_name: string
+          caffeine_amount: number
+          created_at: string
+          date: string
+          id: string
+          notes: string | null
+          serving_size: string
+          user_id: string
+        }
+        Insert: {
+          beverage_id: string
+          beverage_name: string
+          caffeine_amount: number
+          created_at?: string
+          date?: string
+          id?: string
+          notes?: string | null
+          serving_size: string
+          user_id: string
+        }
+        Update: {
+          beverage_id?: string
+          beverage_name?: string
+          caffeine_amount?: number
+          created_at?: string
+          date?: string
+          id?: string
+          notes?: string | null
+          serving_size?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -30,6 +66,30 @@ export type Database = {
           id?: string
           name?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          created_at: string
+          id: string
+          unit_preference: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          unit_preference?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          unit_preference?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

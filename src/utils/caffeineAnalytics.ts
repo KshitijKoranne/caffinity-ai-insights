@@ -1,6 +1,6 @@
 
 import { CaffeineEntry } from './types';
-import { getCaffeineEntries } from './caffeineStorage';
+import { supabase } from '@/integrations/supabase/client';
 
 // Helper function to normalize dates for comparison (removing time part)
 const normalizeDate = (dateString: string): string => {
@@ -8,36 +8,67 @@ const normalizeDate = (dateString: string): string => {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 };
 
-// Get daily caffeine total
-export const getDailyCaffeineTotal = (date: string): number => {
+// Get daily caffeine total from Supabase
+export const getDailyCaffeineTotal = async (date: string): Promise<number> => {
   const normalizedTargetDate = normalizeDate(date);
   console.log("Using normalized date for filtering:", normalizedTargetDate);
   
-  const entries = getCaffeineEntries();
-  const dailyEntries = entries.filter(entry => {
-    const entryDate = normalizeDate(entry.date);
-    const isMatch = entryDate === normalizedTargetDate;
-    return isMatch;
-  });
-  
-  console.log("Found", dailyEntries.length, "entries for", normalizedTargetDate);
-  return dailyEntries.reduce((total, entry) => total + entry.caffeineAmount, 0);
+  try {
+    // Use PostgreSQL date functions to compare only the date part
+    const { data, error } = await supabase
+      .from('caffeine_entries')
+      .select('caffeine_amount')
+      .gte('date', `${normalizedTargetDate}T00:00:00`)
+      .lt('date', `${normalizedTargetDate}T23:59:59`);
+    
+    if (error) {
+      console.error('Error getting daily caffeine total:', error);
+      return 0;
+    }
+    
+    console.log("Found", data.length, "entries for", normalizedTargetDate);
+    return data.reduce((total, entry) => total + entry.caffeine_amount, 0);
+  } catch (error) {
+    console.error('Error getting daily caffeine total:', error);
+    return 0;
+  }
 };
 
-// Get caffeine entries for a specific date
-export const getCaffeineEntriesForDate = (date: string): CaffeineEntry[] => {
+// Get caffeine entries for a specific date from Supabase
+export const getCaffeineEntriesForDate = async (date: string): Promise<CaffeineEntry[]> => {
   const normalizedTargetDate = normalizeDate(date);
   console.log("Looking for entries on date:", normalizedTargetDate);
   
-  const entries = getCaffeineEntries();
-  const filteredEntries = entries.filter(entry => {
-    const entryDate = normalizeDate(entry.date);
-    const isMatch = entryDate === normalizedTargetDate;
-    return isMatch;
-  });
-  
-  console.log("Found", filteredEntries.length, "entries for", normalizedTargetDate);
-  return filteredEntries;
+  try {
+    const { data, error } = await supabase
+      .from('caffeine_entries')
+      .select('*')
+      .gte('date', `${normalizedTargetDate}T00:00:00`)
+      .lt('date', `${normalizedTargetDate}T23:59:59`)
+      .order('date', { ascending: false });
+    
+    if (error) {
+      console.error('Error getting caffeine entries for date:', error);
+      return [];
+    }
+    
+    console.log("Found", data.length, "entries for", normalizedTargetDate);
+    
+    // Transform from Supabase format to application format
+    return data.map(entry => ({
+      id: entry.id,
+      beverageId: entry.beverage_id,
+      beverageName: entry.beverage_name,
+      caffeineAmount: entry.caffeine_amount,
+      servingSize: entry.serving_size,
+      date: entry.date,
+      notes: entry.notes || undefined,
+      userId: entry.user_id
+    }));
+  } catch (error) {
+    console.error('Error getting caffeine entries for date:', error);
+    return [];
+  }
 };
 
 // Get recommended caffeine limit (general guideline is 400mg for adults)
@@ -45,35 +76,60 @@ export const getRecommendedCaffeineLimit = (): number => {
   return 400; // mg per day
 };
 
-// Get unique dates with caffeine entries
-export const getCaffeineHistoryDates = (limit: number = 30): string[] => {
-  const entries = getCaffeineEntries();
-  const uniqueDates = [...new Set(entries.map(entry => normalizeDate(entry.date)))];
-  
-  // Sort dates in descending order (newest first)
-  return uniqueDates.sort((a, b) => new Date(b).getTime() - new Date(a).getTime()).slice(0, limit);
+// Get unique dates with caffeine entries from Supabase
+export const getCaffeineHistoryDates = async (limit: number = 30): Promise<string[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('caffeine_entries')
+      .select('date')
+      .order('date', { ascending: false });
+    
+    if (error) {
+      console.error('Error getting caffeine history dates:', error);
+      return [];
+    }
+    
+    // Extract unique dates by normalizing and using Set
+    const uniqueDates = [...new Set(data.map(entry => normalizeDate(entry.date)))];
+    return uniqueDates.slice(0, limit);
+  } catch (error) {
+    console.error('Error getting caffeine history dates:', error);
+    return [];
+  }
 };
 
-// Get caffeine history for charting (last X days)
-export const getCaffeineHistory = (days: number = 7): { date: string; total: number }[] => {
-  const dates = getCaffeineHistoryDates(days);
-  
-  return dates.map(date => ({
-    date,
-    total: getDailyCaffeineTotal(date)
-  })).reverse(); // Reverse to have oldest first for charting
+// Get caffeine history for charting (last X days) from Supabase
+export const getCaffeineHistory = async (days: number = 7): Promise<{ date: string; total: number }[]> => {
+  try {
+    const dates = await getCaffeineHistoryDates(days);
+    
+    const result = await Promise.all(dates.map(async (date) => ({
+      date,
+      total: await getDailyCaffeineTotal(date)
+    })));
+    
+    return result.reverse(); // Reverse to have oldest first for charting
+  } catch (error) {
+    console.error('Error getting caffeine history:', error);
+    return [];
+  }
 };
 
-// Get daily max caffeine day in history
-export const getMaxCaffeineDay = (): { date: string; total: number } | null => {
-  const history = getCaffeineHistory(30);
-  
-  if (history.length === 0) {
+// Get daily max caffeine day in history from Supabase
+export const getMaxCaffeineDay = async (): Promise<{ date: string; total: number } | null> => {
+  try {
+    const history = await getCaffeineHistory(30);
+    
+    if (history.length === 0) {
+      return null;
+    }
+    
+    return history.reduce((max, current) => 
+      current.total > max.total ? current : max, 
+      history[0]
+    );
+  } catch (error) {
+    console.error('Error getting max caffeine day:', error);
     return null;
   }
-  
-  return history.reduce((max, current) => 
-    current.total > max.total ? current : max, 
-    history[0]
-  );
 };

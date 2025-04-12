@@ -1,33 +1,79 @@
 
 import { CaffeineEntry } from './types';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
-// Get user's caffeine entries from local storage
-export const getCaffeineEntries = (): CaffeineEntry[] => {
-  const userId = localStorage.getItem("caffinity-current-user") || "anonymous";
-  const entries = localStorage.getItem(`caffinity-entries-${userId}`);
-  console.log(`Raw entries from localStorage for user ${userId}:`, entries);
-  return entries ? JSON.parse(entries) : [];
+// Get user's caffeine entries from Supabase
+export const getCaffeineEntries = async (): Promise<CaffeineEntry[]> {
+  try {
+    const { data: entries, error } = await supabase
+      .from('caffeine_entries')
+      .select('*')
+      .order('date', { ascending: false });
+    
+    if (error) {
+      console.error('Error getting caffeine entries:', error);
+      return [];
+    }
+    
+    // Transform from Supabase format to application format
+    return entries.map(entry => ({
+      id: entry.id,
+      beverageId: entry.beverage_id,
+      beverageName: entry.beverage_name,
+      caffeineAmount: entry.caffeine_amount,
+      servingSize: entry.serving_size,
+      date: entry.date,
+      notes: entry.notes || undefined,
+      userId: entry.user_id
+    }));
+  } catch (error) {
+    console.error('Error getting caffeine entries:', error);
+    return [];
+  }
 };
 
-// Save caffeine entry
-export const saveCaffeineEntry = (entry: CaffeineEntry): void => {
-  const userId = localStorage.getItem("caffinity-current-user") || "anonymous";
-  const entries = getCaffeineEntries();
-  const entryWithUser = { ...entry, userId };
-  console.log(`Saving caffeine entry for user ${userId}:`, entryWithUser);
-  entries.push(entryWithUser);
-  localStorage.setItem(`caffinity-entries-${userId}`, JSON.stringify(entries));
-  console.log("Caffeine entry saved successfully:", entryWithUser);
-  console.log("Total entries now:", entries.length);
+// Save caffeine entry to Supabase
+export const saveCaffeineEntry = async (entry: CaffeineEntry): Promise<void> => {
+  try {
+    const { error } = await supabase
+      .from('caffeine_entries')
+      .insert({
+        id: entry.id,
+        beverage_id: entry.beverageId,
+        beverage_name: entry.beverageName,
+        caffeine_amount: entry.caffeineAmount,
+        serving_size: entry.servingSize,
+        date: entry.date,
+        notes: entry.notes || null
+      });
+    
+    if (error) {
+      console.error('Error saving caffeine entry:', error);
+    } else {
+      console.log("Caffeine entry saved successfully:", entry);
+    }
+  } catch (error) {
+    console.error('Error saving caffeine entry:', error);
+  }
 };
 
-// Delete caffeine entry
-export const deleteCaffeineEntry = (entryId: string): void => {
-  const userId = localStorage.getItem("caffinity-current-user") || "anonymous";
-  const entries = getCaffeineEntries();
-  console.log(`Deleting caffeine entry with ID: ${entryId} for user ${userId}`);
-  const updatedEntries = entries.filter(entry => entry.id !== entryId);
-  localStorage.setItem(`caffinity-entries-${userId}`, JSON.stringify(updatedEntries));
-  console.log("Entry deleted successfully");
-  console.log("Total entries now:", updatedEntries.length);
+// Delete caffeine entry from Supabase
+export const deleteCaffeineEntry = async (entryId: string): Promise<void> => {
+  try {
+    console.log(`Deleting caffeine entry with ID: ${entryId}`);
+    
+    const { error } = await supabase
+      .from('caffeine_entries')
+      .delete()
+      .eq('id', entryId);
+    
+    if (error) {
+      console.error('Error deleting caffeine entry:', error);
+    } else {
+      console.log("Entry deleted successfully");
+    }
+  } catch (error) {
+    console.error('Error deleting caffeine entry:', error);
+  }
 };

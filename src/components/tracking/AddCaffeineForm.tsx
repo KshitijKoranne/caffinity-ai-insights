@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,56 +20,78 @@ const AddCaffeineForm = () => {
   const [selectedBeverage, setSelectedBeverage] = useState("");
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [unitPreference, setUnitPreference] = useState<"oz" | "ml" | "cup">("oz");
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { unitPreference } = getUserPreferences();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    // Load user preferences
+    const loadPreferences = async () => {
+      try {
+        const prefs = await getUserPreferences();
+        setUnitPreference(prefs.unitPreference);
+      } catch (error) {
+        console.error("Error loading user preferences:", error);
+      }
+    };
+    
+    loadPreferences();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedBeverage) return;
 
     setIsSubmitting(true);
     
-    // Find the selected beverage from catalog
-    const beverage = BEVERAGE_CATALOG.find(b => b.id === selectedBeverage);
-    if (!beverage) return;
-    
-    // Create new caffeine entry
-    const entry = {
-      id: `entry-${Date.now()}`,
-      beverageId: beverage.id,
-      beverageName: beverage.name,
-      caffeineAmount: beverage.caffeine,
-      servingSize: beverage.servingSize,
-      date: new Date().toISOString(),
-      notes: notes.trim() || undefined,
-    };
-    
-    // Save the entry
-    saveCaffeineEntry(entry);
-    
-    // Dispatch a custom event to notify the dashboard component
-    const event = new Event('caffeineDataUpdated');
-    window.dispatchEvent(event);
-    
-    // Show success message with note information if provided
-    let description = `Added ${beverage.caffeine}mg from ${beverage.name}`;
-    if (notes.trim()) {
-      description += ` with note: "${notes.trim()}"`;
-    }
-    
-    console.log("Added new caffeine entry:", entry);
-    
-    toast({
-      title: "Caffeine logged",
-      description: description,
-    });
-    
-    // Navigate back to dashboard
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      // Find the selected beverage from catalog
+      const beverage = BEVERAGE_CATALOG.find(b => b.id === selectedBeverage);
+      if (!beverage) return;
+      
+      // Create new caffeine entry
+      const entry = {
+        id: `entry-${Date.now()}`,
+        beverageId: beverage.id,
+        beverageName: beverage.name,
+        caffeineAmount: beverage.caffeine,
+        servingSize: beverage.servingSize,
+        date: new Date().toISOString(),
+        notes: notes.trim() || undefined,
+      };
+      
+      // Save the entry
+      await saveCaffeineEntry(entry);
+      
+      // Dispatch a custom event to notify the dashboard component
+      const event = new Event('caffeineDataUpdated');
+      window.dispatchEvent(event);
+      
+      // Show success message with note information if provided
+      let description = `Added ${beverage.caffeine}mg from ${beverage.name}`;
+      if (notes.trim()) {
+        description += ` with note: "${notes.trim()}"`;
+      }
+      
+      console.log("Added new caffeine entry:", entry);
+      
+      toast({
+        title: "Caffeine logged",
+        description: description,
+      });
+      
+      // Navigate back to dashboard
       navigate("/dashboard");
-    }, 500);
+    } catch (error) {
+      console.error("Error adding caffeine entry:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save caffeine entry.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

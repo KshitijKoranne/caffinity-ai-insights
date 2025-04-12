@@ -28,9 +28,38 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 export const CaffeineHistoryChart = () => {
   const [days, setDays] = useState(7);
-  const history = getCaffeineHistory(days);
+  const [history, setHistory] = useState<{ date: string; total: number }[]>([]);
+  const [loading, setLoading] = useState(true);
   const recommendedLimit = getRecommendedCaffeineLimit();
   const isMobile = useIsMobile();
+  
+  // Load caffeine history data
+  useEffect(() => {
+    const loadHistory = async () => {
+      try {
+        setLoading(true);
+        const historyData = await getCaffeineHistory(days);
+        setHistory(historyData);
+      } catch (error) {
+        console.error("Error loading caffeine history:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadHistory();
+    
+    // Listen for updates
+    const handleDataUpdated = () => {
+      loadHistory();
+    };
+    
+    window.addEventListener("caffeineDataUpdated", handleDataUpdated);
+    
+    return () => {
+      window.removeEventListener("caffeineDataUpdated", handleDataUpdated);
+    };
+  }, [days]);
   
   // Format data for the chart
   const chartData = history.map(item => ({
@@ -77,7 +106,11 @@ export const CaffeineHistoryChart = () => {
         </div>
       </div>
       
-      {chartData.length === 0 ? (
+      {loading ? (
+        <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
+          <p>Loading history data...</p>
+        </div>
+      ) : chartData.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
           <CalendarDays className="h-10 w-10 mb-2 opacity-20" />
           <p>No history data available</p>
@@ -125,7 +158,7 @@ export const CaffeineHistoryChart = () => {
                   y={recommendedLimit} 
                   stroke="rgba(220, 38, 38, 0.5)" 
                   strokeDasharray="3 3" 
-                  label={null} // Removed the label that showed "Limit"
+                  label={null} 
                 />
                 <Line 
                   type="monotone"
