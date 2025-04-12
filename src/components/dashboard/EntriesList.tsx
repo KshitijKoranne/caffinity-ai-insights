@@ -1,22 +1,25 @@
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Coffee, FileText } from "lucide-react";
+import { Coffee, FileText, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { CaffeineEntry } from "@/utils/caffeineData";
-import { formatTimeForDisplay } from "@/utils/dateUtils";
+import { formatTimeForDisplay, isToday } from "@/utils/dateUtils";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useState } from "react";
+import { toast } from "sonner";
 
 interface EntriesListProps {
   entries: CaffeineEntry[];
+  onEntryDelete?: (entryId: string) => void;
+  allowDelete?: boolean;
 }
 
-const EntriesList = ({ entries }: EntriesListProps) => {
+const EntriesList = ({ entries, onEntryDelete, allowDelete = false }: EntriesListProps) => {
   const [showNoteForEntry, setShowNoteForEntry] = useState<string | null>(null);
 
   const toggleNote = (entryId: string) => {
@@ -24,6 +27,13 @@ const EntriesList = ({ entries }: EntriesListProps) => {
       setShowNoteForEntry(null);
     } else {
       setShowNoteForEntry(entryId);
+    }
+  };
+
+  const handleDelete = (entryId: string) => {
+    if (onEntryDelete) {
+      onEntryDelete(entryId);
+      toast.success("Entry deleted successfully");
     }
   };
 
@@ -36,7 +46,7 @@ const EntriesList = ({ entries }: EntriesListProps) => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <p className="text-muted-foreground">No caffeine logged today.</p>
+          <p className="text-muted-foreground">No caffeine entries found.</p>
           <p className="text-sm mt-1">Track your first drink!</p>
         </motion.div>
       ) : (
@@ -79,23 +89,43 @@ const EntriesList = ({ entries }: EntriesListProps) => {
                     <p className="text-xs text-muted-foreground">
                       {formatTimeForDisplay(entry.date)}
                     </p>
-                    {entry.notes && (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-6 w-6 mt-1" 
-                            onClick={() => toggleNote(entry.id)}
-                          >
-                            <FileText className="h-3 w-3" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>View notes</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    )}
+                    <div className="flex items-center mt-1">
+                      {entry.notes && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-6 w-6" 
+                              onClick={() => toggleNote(entry.id)}
+                            >
+                              <FileText className="h-3 w-3" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>View notes</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                      
+                      {allowDelete && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-6 w-6 text-destructive hover:text-destructive" 
+                              onClick={() => handleDelete(entry.id)}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Delete entry</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
                   </div>
                 </div>
               </Card>
