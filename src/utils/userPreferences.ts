@@ -12,15 +12,23 @@ export const getUserPreferences = async (): Promise<{unitPreference: UnitPrefere
       return { unitPreference: "oz" as UnitPreference };
     }
     
+    // Fix: Use proper filtering with eq operator instead of passing user_id as a query param
     const { data, error } = await supabase
       .from('user_preferences')
       .select('unit_preference')
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
     
-    if (error) {
+    if (error && error.code !== 'PGRST116') {
       console.error('Error getting user preferences:', error);
       // Return default preferences if none found
+      return { unitPreference: "oz" as UnitPreference };
+    }
+    
+    if (!data) {
+      // If no preferences found, set up default preferences for this user
+      console.log('No preferences found, creating default preferences for user');
+      await saveUserPreferences({ unitPreference: "oz" });
       return { unitPreference: "oz" as UnitPreference };
     }
     
@@ -46,7 +54,7 @@ export const saveUserPreferences = async (prefs: {unitPreference: UnitPreference
       .from('user_preferences')
       .select('id')
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
     
     if (selectError && selectError.code !== 'PGRST116') {
       // If error is not "no rows returned", log it

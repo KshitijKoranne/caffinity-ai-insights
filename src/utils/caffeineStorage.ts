@@ -56,23 +56,26 @@ export const saveCaffeineEntry = async (entry: CaffeineEntry): Promise<void> => 
 
     console.log(`Saving new caffeine entry for user ${user.id}`);
     
+    // Remove the id field to let Supabase generate a UUID
+    // We'll create an object without the custom string ID
+    const { id, ...entryWithoutId } = entry;
+    
     const { error } = await supabase
       .from('caffeine_entries')
       .insert({
-        id: entry.id,
-        beverage_id: entry.beverageId,
-        beverage_name: entry.beverageName,
-        caffeine_amount: entry.caffeineAmount,
-        serving_size: entry.servingSize,
-        date: entry.date,
-        notes: entry.notes || null,
+        beverage_id: entryWithoutId.beverageId,
+        beverage_name: entryWithoutId.beverageName,
+        caffeine_amount: entryWithoutId.caffeineAmount,
+        serving_size: entryWithoutId.servingSize,
+        date: entryWithoutId.date,
+        notes: entryWithoutId.notes || null,
         user_id: user.id
       });
     
     if (error) {
       console.error('Error saving caffeine entry:', error);
     } else {
-      console.log("Caffeine entry saved successfully:", entry);
+      console.log("Caffeine entry saved successfully");
     }
   } catch (error) {
     console.error('Error saving caffeine entry:', error);
