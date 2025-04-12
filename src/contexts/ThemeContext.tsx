@@ -12,8 +12,10 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  // Initialize with a function to avoid executing during SSR
+  // Initialize state with null to avoid hydration mismatch
   const [theme, setThemeState] = useState<Theme>('light');
+  // Add a state to track if theme is currently transitioning to prevent multiple toggles
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Apply theme class and store in localStorage when it changes
   useEffect(() => {
@@ -33,14 +35,18 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       return 'light'; // Default theme
     };
     
-    // Set initial theme
+    // Set initial theme only on first render
     setThemeState(getInitialTheme());
-    
-    // Apply theme class to document
-    const root = window.document.documentElement;
-    root.classList.remove('light', 'dark');
-    root.classList.add(theme);
-    localStorage.setItem('theme', theme);
+  }, []);
+
+  // Apply theme changes to document and localStorage
+  useEffect(() => {
+    if (theme) {
+      const root = window.document.documentElement;
+      root.classList.remove('light', 'dark');
+      root.classList.add(theme);
+      localStorage.setItem('theme', theme);
+    }
   }, [theme]);
 
   // Watch for system theme changes
@@ -65,7 +71,16 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   };
 
   const toggleTheme = () => {
+    // Prevent multiple rapid toggles
+    if (isTransitioning) return;
+    
+    setIsTransitioning(true);
     setThemeState(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+    
+    // Allow toggling again after a short delay
+    setTimeout(() => {
+      setIsTransitioning(false);
+    }, 300); // Match this with your CSS transition duration
   };
 
   return (
