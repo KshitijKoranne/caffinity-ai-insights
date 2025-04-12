@@ -12,7 +12,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  // Get initial theme from local storage or system preference
+  // Get initial theme function - extracted to ensure it doesn't run during rendering
   const getInitialTheme = (): Theme => {
     if (typeof window !== 'undefined') {
       const storedTheme = localStorage.getItem('theme') as Theme | null;
@@ -28,7 +28,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return 'light'; // Default theme
   };
 
-  const [theme, setThemeState] = useState<Theme>(getInitialTheme);
+  // Initialize state with a function to avoid executing during render
+  const [theme, setThemeState] = useState<Theme>(() => getInitialTheme());
 
   // Apply theme class to document when it changes
   useEffect(() => {
@@ -40,6 +41,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   // Watch for system theme changes
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = () => {
       const savedTheme = localStorage.getItem('theme') as Theme | null;
