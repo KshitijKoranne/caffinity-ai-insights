@@ -17,7 +17,6 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { format, subDays, addDays, parseISO, isToday } from "date-fns";
 import { CaffeineHistoryChart } from "../history/CaffeineHistoryChart";
-import { toast } from "sonner";
 
 const Dashboard = () => {
   const [caffeineTotal, setCaffeineTotal] = useState(0);
@@ -76,8 +75,6 @@ const Dashboard = () => {
     // Don't allow going past today
     if (nextDate <= today) {
       setCurrentDate(nextDate);
-    } else {
-      toast.error("Cannot view future dates");
     }
   };
 
@@ -90,8 +87,6 @@ const Dashboard = () => {
     // Don't allow selecting future dates
     if (selectedDate <= today) {
       setCurrentDate(selectedDate);
-    } else {
-      toast.error("Cannot view future dates");
     }
   };
 

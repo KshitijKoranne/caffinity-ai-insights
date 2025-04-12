@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Coffee, Package, User, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 type NavItemProps = {
   icon: ReactNode;
@@ -15,13 +16,13 @@ type NavItemProps = {
 const NavItem = ({ icon, label, isActive, onClick }: NavItemProps) => (
   <Button
     variant={isActive ? "secondary" : "ghost"}
-    className={`flex items-center gap-3 w-full justify-start ${
+    className={`flex items-center gap-2 w-full justify-center ${
       isActive ? "bg-coffee/10 hover:bg-coffee/20" : ""
     }`}
     onClick={onClick}
   >
     {icon}
-    <span>{label}</span>
+    <span className="text-xs">{label}</span>
   </Button>
 );
 
@@ -39,9 +40,26 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
       {/* Main content */}
       <main className="flex-grow pb-16">{children}</main>
 
+      {/* Floating Add Button */}
+      <motion.div 
+        className="fixed bottom-20 right-4 z-20"
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <Button
+          size="lg"
+          onClick={() => navigateTo("/add")}
+          className="bg-coffee hover:bg-coffee-dark text-white rounded-full h-14 w-14 flex items-center justify-center shadow-lg"
+        >
+          <Plus className="h-6 w-6" />
+        </Button>
+      </motion.div>
+
       {/* Bottom navigation bar */}
       <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-2 z-10">
-        <div className="max-w-lg mx-auto flex items-center justify-between">
+        <div className="max-w-lg mx-auto flex items-center justify-between px-6">
           <NavItem
             icon={<Coffee className="h-5 w-5" />}
             label="Today"
@@ -50,16 +68,6 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
             onClick={() => navigateTo("/dashboard")}
           />
           
-          <div className="relative -mt-8">
-            <Button
-              size="lg"
-              onClick={() => navigateTo("/add")}
-              className="bg-coffee hover:bg-coffee-dark text-white rounded-full h-14 w-14 flex items-center justify-center shadow-lg"
-            >
-              <Plus className="h-6 w-6" />
-            </Button>
-          </div>
-
           <NavItem
             icon={<Package className="h-5 w-5" />}
             label="Catalog"

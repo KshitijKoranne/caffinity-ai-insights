@@ -14,13 +14,15 @@ import {
   ChartTooltipContent
 } from "@/components/ui/chart";
 import {
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   ResponsiveContainer,
   ReferenceLine,
+  Tooltip,
+  Dot,
 } from "recharts";
 import { CalendarDays, Coffee, MoveUp } from "lucide-react";
 import { motion } from "framer-motion";
@@ -99,7 +101,7 @@ export const CaffeineHistoryChart = () => {
               }}
             >
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData}>
+                <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis 
                     dataKey="display" 
@@ -123,16 +125,27 @@ export const CaffeineHistoryChart = () => {
                       fontSize: 12
                     }} 
                   />
-                  <Bar 
+                  <Line 
+                    type="monotone"
                     dataKey="caffeine" 
-                    fill="hsl(25, 70%, 45%)" 
-                    radius={[4, 4, 0, 0]}
+                    stroke="hsl(25, 70%, 45%)"
+                    strokeWidth={2}
+                    dot={(props) => (
+                      <Dot
+                        {...props}
+                        r={4}
+                        fill="hsl(25, 70%, 45%)"
+                        stroke="white"
+                        strokeWidth={1}
+                      />
+                    )}
+                    activeDot={{ r: 6, fill: "hsl(25, 70%, 45%)", stroke: "white", strokeWidth: 2 }}
                   />
                   <ChartTooltip 
-                    cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }}
+                    cursor={{ stroke: 'rgba(0, 0, 0, 0.15)', strokeDasharray: '5 5' }}
                     content={<ChartTooltipContent />}
                   />
-                </BarChart>
+                </LineChart>
               </ResponsiveContainer>
             </ChartContainer>
           </div>

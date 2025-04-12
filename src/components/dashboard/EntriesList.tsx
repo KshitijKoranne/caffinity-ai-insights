@@ -11,7 +11,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useState } from "react";
-import { toast } from "sonner";
 
 interface EntriesListProps {
   entries: CaffeineEntry[];
@@ -33,7 +32,6 @@ const EntriesList = ({ entries, onEntryDelete, allowDelete = false }: EntriesLis
   const handleDelete = (entryId: string) => {
     if (onEntryDelete) {
       onEntryDelete(entryId);
-      toast.success("Entry deleted successfully");
     }
   };
 
