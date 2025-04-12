@@ -86,8 +86,8 @@ const Dashboard = () => {
     <div className="p-4 space-y-6 pb-20">
       <header className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{getGreeting()}, {userName}</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl font-bold text-foreground">{getGreeting()}, {userName}</h1>
+          <p className="text-muted-foreground text-sm">
             {currentDate === getCurrentDateYMD() ? "Today" : ""}
           </p>
         </div>
