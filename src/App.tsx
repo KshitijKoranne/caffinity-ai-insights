@@ -20,9 +20,9 @@ const queryClient = new QueryClient();
 // Properly structured component with React root
 function App() {
   return (
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <BrowserRouter>
           <AuthProvider>
             <TooltipProvider>
               <Routes>
@@ -56,9 +56,9 @@ function App() {
               </Routes>
             </TooltipProvider>
           </AuthProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+        </BrowserRouter>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 

@@ -1,5 +1,5 @@
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, FC } from 'react';
 
 type Theme = 'light' | 'dark';
 
@@ -11,8 +11,9 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  // Initialize state with null to avoid hydration mismatch
+// Define ThemeProvider as a proper FC (Functional Component)
+export const ThemeProvider: FC<{ children: ReactNode }> = ({ children }) => {
+  // Initialize state with 'light' as default to avoid hydration mismatch
   const [theme, setThemeState] = useState<Theme>('light');
   // Add a state to track if theme is currently transitioning to prevent multiple toggles
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -88,7 +89,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       {children}
     </ThemeContext.Provider>
   );
-}
+};
 
 export const useTheme = () => {
   const context = useContext(ThemeContext);
