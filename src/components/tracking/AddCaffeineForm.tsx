@@ -6,7 +6,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   saveCaffeineEntry, 
@@ -21,7 +20,6 @@ const AddCaffeineForm = () => {
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [unitPreference, setUnitPreference] = useState<"oz" | "ml" | "cup">("oz");
-  const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -61,34 +59,25 @@ const AddCaffeineForm = () => {
       };
       
       // Save the entry
+      console.log("Saving caffeine entry:", entry);
       await saveCaffeineEntry(entry);
       
-      // Dispatch a custom event to notify the dashboard component
-      const event = new Event('caffeineDataUpdated');
-      window.dispatchEvent(event);
-      
-      // Show success message with note information if provided
-      let description = `Added ${beverage.caffeine}mg from ${beverage.name}`;
-      if (notes.trim()) {
-        description += ` with note: "${notes.trim()}"`;
-      }
+      // Make sure to dispatch the event globally so it can be caught by all components
+      // This line is critical for updating the dashboard
+      window.dispatchEvent(new Event('caffeineDataUpdated'));
       
       console.log("Added new caffeine entry:", entry);
-      
-      toast({
-        title: "Caffeine logged",
-        description: description,
-      });
+      console.log("Event dispatched: caffeineDataUpdated");
       
       // Navigate back to dashboard
       navigate("/dashboard");
+      
+      // Optionally force a reload to ensure fresh data
+      setTimeout(() => {
+        window.dispatchEvent(new Event('caffeineDataUpdated'));
+      }, 100);
     } catch (error) {
       console.error("Error adding caffeine entry:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save caffeine entry.",
-        variant: "destructive",
-      });
     } finally {
       setIsSubmitting(false);
     }

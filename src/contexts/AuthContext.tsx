@@ -2,7 +2,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
-import { toast } from "@/hooks/use-toast";
 
 interface AuthContextType {
   user: User | null;
@@ -34,17 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           localStorage.removeItem("caffinity-current-user");
         }
         
-        if (event === 'SIGNED_IN') {
-          toast({
-            title: "Logged in successfully",
-            description: "Welcome back to Caffinity!",
-          });
-        } else if (event === 'SIGNED_OUT') {
-          toast({
-            title: "Logged out",
-            description: "You have been logged out successfully.",
-          });
-        }
+        // Removed toast notifications here
       }
     );
 

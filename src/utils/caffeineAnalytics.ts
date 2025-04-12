@@ -26,6 +26,8 @@ export const getDailyCaffeineTotal = async (date: string): Promise<number> => {
       return 0;
     }
     
+    console.log(`Fetching daily caffeine total for user ${userId} on date ${normalizedTargetDate}`);
+    
     // Use PostgreSQL date functions to compare only the date part
     const { data, error } = await supabase
       .from('caffeine_entries')
@@ -40,7 +42,9 @@ export const getDailyCaffeineTotal = async (date: string): Promise<number> => {
     }
     
     console.log("Found", data.length, "entries for", normalizedTargetDate);
-    return data.reduce((total, entry) => total + entry.caffeine_amount, 0);
+    const total = data.reduce((total, entry) => total + entry.caffeine_amount, 0);
+    console.log("Calculated total:", total);
+    return total;
   } catch (error) {
     console.error('Error getting daily caffeine total:', error);
     return 0;
@@ -58,6 +62,8 @@ export const getCaffeineEntriesForDate = async (date: string): Promise<CaffeineE
       console.log('No user logged in, returning empty entries list');
       return [];
     }
+    
+    console.log(`Fetching caffeine entries for user ${userId} on date ${normalizedTargetDate}`);
     
     const { data, error } = await supabase
       .from('caffeine_entries')
@@ -129,12 +135,14 @@ export const getCaffeineHistoryDates = async (limit: number = 30): Promise<strin
 export const getCaffeineHistory = async (days: number = 7): Promise<{ date: string; total: number }[]> => {
   try {
     const dates = await getCaffeineHistoryDates(days);
+    console.log("Retrieved dates for history:", dates);
     
     const result = await Promise.all(dates.map(async (date) => ({
       date,
       total: await getDailyCaffeineTotal(date)
     })));
     
+    console.log("Compiled caffeine history:", result);
     return result.reverse(); // Reverse to have oldest first for charting
   } catch (error) {
     console.error('Error getting caffeine history:', error);

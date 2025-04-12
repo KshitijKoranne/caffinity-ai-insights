@@ -7,7 +7,6 @@ import { motion } from "framer-motion";
 import DateNavigation from "./DateNavigation";
 import DashboardTabs from "./DashboardTabs";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
   const [caffeineTotal, setCaffeineTotal] = useState(0);
@@ -17,7 +16,6 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"today" | "history">("today");
   const { user } = useAuth();
-  const { toast } = useToast();
 
   // Get greeting based on time of day
   const getGreeting = () => {
@@ -49,11 +47,6 @@ const Dashboard = () => {
       console.log("Today's entries loaded:", todayEntries);
     } catch (error) {
       console.error("Error loading caffeine data:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load your caffeine data.",
-        variant: "destructive",
-      });
     } finally {
       setLoading(false);
     }
@@ -70,6 +63,7 @@ const Dashboard = () => {
     
     // Set up an event listener for storage changes
     const handleDataUpdated = () => {
+      console.log("Dashboard received caffeineDataUpdated event, reloading data");
       loadCaffeineData();
     };
     
@@ -92,18 +86,8 @@ const Dashboard = () => {
       
       // Dispatch event to update other components
       window.dispatchEvent(new Event("caffeineDataUpdated"));
-      
-      toast({
-        title: "Entry deleted",
-        description: "Caffeine entry was successfully removed.",
-      });
     } catch (error) {
       console.error("Error deleting entry:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete the entry.",
-        variant: "destructive",
-      });
     }
   };
 

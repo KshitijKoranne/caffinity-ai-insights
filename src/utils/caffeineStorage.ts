@@ -1,20 +1,31 @@
 
 import { CaffeineEntry } from './types';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
 
 // Get user's caffeine entries from Supabase
 export const getCaffeineEntries = async (): Promise<CaffeineEntry[]> => {
   try {
+    console.log("Attempting to get caffeine entries from Supabase");
+    
+    // Get the current user ID
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.error('No user logged in');
+      return [];
+    }
+    
     const { data: entries, error } = await supabase
       .from('caffeine_entries')
       .select('*')
+      .eq('user_id', user.id)
       .order('date', { ascending: false });
     
     if (error) {
       console.error('Error getting caffeine entries:', error);
       return [];
     }
+    
+    console.log('Retrieved caffeine entries from Supabase:', entries.length);
     
     // Transform from Supabase format to application format
     return entries.map(entry => ({
@@ -43,6 +54,8 @@ export const saveCaffeineEntry = async (entry: CaffeineEntry): Promise<void> => 
       return;
     }
 
+    console.log(`Saving new caffeine entry for user ${user.id}`);
+    
     const { error } = await supabase
       .from('caffeine_entries')
       .insert({
