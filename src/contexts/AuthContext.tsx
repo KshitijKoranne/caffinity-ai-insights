@@ -21,7 +21,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    const { data } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
@@ -32,8 +32,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else if (event === 'SIGNED_OUT') {
           localStorage.removeItem("caffinity-current-user");
         }
-        
-        // Removed toast notifications here
       }
     );
 
@@ -50,8 +48,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
 
+    // Clean up subscription on unmount
     return () => {
-      subscription.unsubscribe();
+      data.subscription.unsubscribe();
     };
   }, []);
 
