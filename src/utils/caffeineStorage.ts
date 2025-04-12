@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 // Get user's caffeine entries from Supabase
-export const getCaffeineEntries = async (): Promise<CaffeineEntry[]> {
+export const getCaffeineEntries = async (): Promise<CaffeineEntry[]> => {
   try {
     const { data: entries, error } = await supabase
       .from('caffeine_entries')
