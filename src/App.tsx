@@ -18,47 +18,50 @@ import { Toaster } from "@/components/ui/toaster";
 // Create a new query client instance outside of component render
 const queryClient = new QueryClient();
 
-const App = () => (
-  <BrowserRouter>
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <AuthProvider>
-          <TooltipProvider>
-            <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/login" element={<Index />} />
-              
-              {/* Protected Routes */}
-              <Route path="/dashboard" element={
-                <AppLayout>
-                  <Dashboard />
-                </AppLayout>
-              } />
-              <Route path="/add" element={
-                <AppLayout>
-                  <AddCaffeineForm />
-                </AppLayout>
-              } />
-              <Route path="/catalog" element={
-                <AppLayout>
-                  <BeverageCatalog />
-                </AppLayout>
-              } />
-              <Route path="/profile" element={
-                <AppLayout>
-                  <ProfilePage />
-                </AppLayout>
-              } />
-              
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <Toaster />
-          </TooltipProvider>
-        </AuthProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
-  </BrowserRouter>
-);
+// Properly structured component with React root
+function App() {
+  return (
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <AuthProvider>
+            <TooltipProvider>
+              <Routes>
+                <Route path="/" element={<Landing />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/login" element={<Index />} />
+                
+                {/* Protected Routes */}
+                <Route path="/dashboard" element={
+                  <AppLayout>
+                    <Dashboard />
+                  </AppLayout>
+                } />
+                <Route path="/add" element={
+                  <AppLayout>
+                    <AddCaffeineForm />
+                  </AppLayout>
+                } />
+                <Route path="/catalog" element={
+                  <AppLayout>
+                    <BeverageCatalog />
+                  </AppLayout>
+                } />
+                <Route path="/profile" element={
+                  <AppLayout>
+                    <ProfilePage />
+                  </AppLayout>
+                } />
+                
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <Toaster />
+            </TooltipProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
+  );
+}
 
 export default App;
