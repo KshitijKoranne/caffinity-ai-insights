@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { CaffeineEntry, getDailyCaffeineTotal, getCaffeineEntriesForDate, getRecommendedCaffeineLimit, deleteCaffeineEntry } from "@/utils/caffeineData";
-import { getCurrentDateYMD, formatDateYMD } from "@/utils/dateUtils";
+import { getCurrentDateYMD } from "@/utils/dateUtils";
 import { Coffee } from "lucide-react";
 import { motion } from "framer-motion";
 import DateNavigation from "./DateNavigation";
@@ -14,6 +14,17 @@ const Dashboard = () => {
   const [currentDate, setCurrentDate] = useState(getCurrentDateYMD());
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"today" | "history">("today");
+
+  // Get greeting based on time of day
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 18) return "Good Afternoon";
+    return "Good Evening";
+  };
+  
+  // User's name - in a real app this would come from a user profile
+  const userName = "Coffee Lover";
 
   const loadCaffeineData = () => {
     console.log("Dashboard - Loading latest caffeine data for date:", currentDate);
@@ -73,7 +84,7 @@ const Dashboard = () => {
     <div className="p-4 space-y-6 pb-20">
       <header className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-coffee-dark">Dashboard</h1>
+          <h1 className="text-2xl font-bold text-foreground">{getGreeting()}, {userName}</h1>
           <p className="text-muted-foreground">
             {currentDate === getCurrentDateYMD() ? "Today" : ""}
           </p>
