@@ -24,6 +24,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     // Set up auth state listener FIRST
     const { data } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
+        console.log("Auth state change:", event);
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         
@@ -37,17 +38,24 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      
-      // Store current user ID in localStorage for data isolation
-      if (currentSession?.user) {
-        localStorage.setItem("caffinity-current-user", currentSession.user.id);
+    const initializeAuth = async () => {
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        
+        // Store current user ID in localStorage for data isolation
+        if (currentSession?.user) {
+          localStorage.setItem("caffinity-current-user", currentSession.user.id);
+        }
+      } catch (error) {
+        console.error("Error getting session:", error);
+      } finally {
+        setLoading(false);
       }
-      
-      setLoading(false);
-    });
+    };
+
+    initializeAuth();
 
     // Clean up subscription on unmount
     return () => {

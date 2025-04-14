@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import DateNavigation from "./DateNavigation";
 import DashboardTabs from "./DashboardTabs";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [caffeineTotal, setCaffeineTotal] = useState(0);
@@ -16,6 +17,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"today" | "history">("today");
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   // Get greeting based on time of day
   const getGreeting = () => {
@@ -25,10 +27,14 @@ const Dashboard = () => {
     return "Good Evening";
   };
   
-  // Get user's name from auth context
-  const userName = user?.user_metadata?.name || "User";
+  // Get user's name from auth context or default to "there"
+  const userName = user?.user_metadata?.name || "there";
 
   const loadCaffeineData = async () => {
+    if (!user) {
+      return; // Don't load data if user isn't authenticated
+    }
+    
     try {
       console.log("Dashboard - Loading latest caffeine data for date:", currentDate);
       setLoading(true);
@@ -53,26 +59,31 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    if (!user) {
-      console.log("Dashboard: No user logged in, redirecting or showing login prompt");
-      return;
-    }
-    
-    console.log("Dashboard component mounted, loading initial data");
-    loadCaffeineData();
-    
-    // Set up an event listener for storage changes
-    const handleDataUpdated = () => {
-      console.log("Dashboard received caffeineDataUpdated event, reloading data");
+    // Ensure we have a user before loading data
+    if (user) {
+      console.log("Dashboard component mounted, loading initial data");
       loadCaffeineData();
-    };
-    
-    window.addEventListener("caffeineDataUpdated", handleDataUpdated);
-    
-    return () => {
-      window.removeEventListener("caffeineDataUpdated", handleDataUpdated);
-    };
+      
+      // Set up an event listener for storage changes
+      const handleDataUpdated = () => {
+        console.log("Dashboard received caffeineDataUpdated event, reloading data");
+        loadCaffeineData();
+      };
+      
+      window.addEventListener("caffeineDataUpdated", handleDataUpdated);
+      
+      return () => {
+        window.removeEventListener("caffeineDataUpdated", handleDataUpdated);
+      };
+    }
   }, [currentDate, user]);
+
+  // Handle case where user is not authenticated
+  useEffect(() => {
+    if (!user && !loading) {
+      navigate("/auth");
+    }
+  }, [user, loading, navigate]);
 
   const handleDateChange = (date: string) => {
     setCurrentDate(date);

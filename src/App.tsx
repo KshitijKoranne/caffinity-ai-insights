@@ -1,6 +1,6 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./components/dashboard/Dashboard";
 import AddCaffeineForm from "./components/tracking/AddCaffeineForm";
 import BeverageCatalog from "./components/catalog/BeverageCatalog";
@@ -13,6 +13,7 @@ import Auth from "./pages/Auth";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 // Create a new query client instance outside of component render
 const queryClient = new QueryClient();
@@ -25,38 +26,47 @@ function App() {
         <ThemeProvider>
           <AuthProvider>
             <Routes>
+              {/* Public Routes */}
               <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/login" element={<Index />} />
               
               {/* Protected Routes */}
               <Route path="/dashboard" element={
-                <AppLayout>
-                  <TooltipProvider>
-                    <Dashboard />
-                  </TooltipProvider>
-                </AppLayout>
+                <ProtectedRoute>
+                  <AppLayout>
+                    <TooltipProvider>
+                      <Dashboard />
+                    </TooltipProvider>
+                  </AppLayout>
+                </ProtectedRoute>
               } />
               <Route path="/add" element={
-                <AppLayout>
-                  <TooltipProvider>
-                    <AddCaffeineForm />
-                  </TooltipProvider>
-                </AppLayout>
+                <ProtectedRoute>
+                  <AppLayout>
+                    <TooltipProvider>
+                      <AddCaffeineForm />
+                    </TooltipProvider>
+                  </AppLayout>
+                </ProtectedRoute>
               } />
               <Route path="/catalog" element={
-                <AppLayout>
-                  <TooltipProvider>
-                    <BeverageCatalog />
-                  </TooltipProvider>
-                </AppLayout>
+                <ProtectedRoute>
+                  <AppLayout>
+                    <TooltipProvider>
+                      <BeverageCatalog />
+                    </TooltipProvider>
+                  </AppLayout>
+                </ProtectedRoute>
               } />
               <Route path="/profile" element={
-                <AppLayout>
-                  <TooltipProvider>
-                    <ProfilePage />
-                  </TooltipProvider>
-                </AppLayout>
+                <ProtectedRoute>
+                  <AppLayout>
+                    <TooltipProvider>
+                      <ProfilePage />
+                    </TooltipProvider>
+                  </AppLayout>
+                </ProtectedRoute>
               } />
               
               <Route path="*" element={<NotFound />} />

@@ -12,15 +12,19 @@ const Index = () => {
   const { theme } = useTheme();
 
   useEffect(() => {
+    // Only redirect after auth is determined
     if (!loading) {
       if (user) {
+        // If user is authenticated, go to dashboard
         navigate("/dashboard");
       } else {
+        // If user is not authenticated, go to landing page
         navigate("/");
       }
     }
   }, [user, loading, navigate]);
 
+  // Show loading screen while determining auth state
   return (
     <div className="h-screen w-full flex flex-col items-center justify-center">
       <motion.div

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -49,6 +50,7 @@ const ProfilePage = () => {
         
         if (data) {
           setName(data.name || "");
+          // Always use the email from auth user object as it's the source of truth
           setEmail(user.email || "");
         }
       } catch (error: any) {
@@ -186,7 +188,9 @@ const ProfilePage = () => {
               type="email"
               value={email}
               disabled={true}
+              className="bg-muted"
             />
+            <p className="text-xs text-muted-foreground">Email address cannot be changed</p>
           </div>
           
           <div className="pt-4">
@@ -216,6 +220,7 @@ const ProfilePage = () => {
         </CardContent>
       </Card>
       
+      {/* Settings card */}
       <Card className="border-coffee/20">
         <CardHeader>
           <CardTitle className="text-lg">App Settings</CardTitle>
