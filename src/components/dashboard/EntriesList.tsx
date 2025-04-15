@@ -36,24 +36,8 @@ const EntriesList = ({ entries, onEntryDelete, allowDelete = false }: EntriesLis
     }
   };
 
-  // Helper function to safely render tooltip
-  const renderTooltip = (triggerElement: React.ReactNode, content: string) => {
-    return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            {triggerElement}
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{content}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    );
-  };
-
   return (
-    <>
+    <TooltipProvider>
       {entries.length === 0 ? (
         <motion.div 
           className="text-center py-8 bg-muted/30 rounded-lg"
@@ -106,31 +90,39 @@ const EntriesList = ({ entries, onEntryDelete, allowDelete = false }: EntriesLis
                     </p>
                     <div className="flex items-center mt-1">
                       {entry.notes && (
-                        renderTooltip(
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-6 w-6" 
-                            onClick={() => toggleNote(entry.id)}
-                          >
-                            <FileText className="h-3 w-3" />
-                          </Button>,
-                          "View notes"
-                        )
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-6 w-6" 
+                              onClick={() => toggleNote(entry.id)}
+                            >
+                              <FileText className="h-3 w-3" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>View notes</p>
+                          </TooltipContent>
+                        </Tooltip>
                       )}
                       
                       {allowDelete && (
-                        renderTooltip(
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-6 w-6 text-destructive hover:text-destructive" 
-                            onClick={() => handleDelete(entry.id)}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>,
-                          "Delete entry"
-                        )
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-6 w-6 text-destructive hover:text-destructive" 
+                              onClick={() => handleDelete(entry.id)}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Delete entry</p>
+                          </TooltipContent>
+                        </Tooltip>
                       )}
                     </div>
                   </div>
@@ -140,7 +132,7 @@ const EntriesList = ({ entries, onEntryDelete, allowDelete = false }: EntriesLis
           ))}
         </motion.div>
       )}
-    </>
+    </TooltipProvider>
   );
 };
 
