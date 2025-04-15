@@ -1,11 +1,10 @@
 
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LoginForm from "@/components/auth/LoginForm";
 import SignupForm from "@/components/auth/SignupForm";
 import { Coffee, Home } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -67,28 +66,34 @@ const Auth = () => {
         >
           <Card className="border-coffee/20 shadow-lg">
             <CardContent className="pt-6">
-              <Tabs defaultValue="login" value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid grid-cols-2 mb-6">
-                  <TabsTrigger value="login">Login</TabsTrigger>
-                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
-                </TabsList>
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={activeTab}
-                    initial={{ opacity: 0, x: activeTab === "login" ? -20 : 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: activeTab === "login" ? 20 : -20 }}
-                    transition={{ duration: 0.3 }}
+              <div className="space-y-4">
+                <div className="flex border-b">
+                  <button
+                    className={`pb-2 px-4 text-sm font-medium flex-1 ${
+                      activeTab === "login"
+                        ? "border-b-2 border-coffee text-foreground"
+                        : "text-muted-foreground"
+                    }`}
+                    onClick={() => setActiveTab("login")}
                   >
-                    <TabsContent value="login" className="mt-0">
-                      <LoginForm />
-                    </TabsContent>
-                    <TabsContent value="signup" className="mt-0">
-                      <SignupForm />
-                    </TabsContent>
-                  </motion.div>
-                </AnimatePresence>
-              </Tabs>
+                    Login
+                  </button>
+                  <button
+                    className={`pb-2 px-4 text-sm font-medium flex-1 ${
+                      activeTab === "signup"
+                        ? "border-b-2 border-coffee text-foreground"
+                        : "text-muted-foreground"
+                    }`}
+                    onClick={() => setActiveTab("signup")}
+                  >
+                    Sign Up
+                  </button>
+                </div>
+                
+                <div className="pt-2">
+                  {activeTab === "login" ? <LoginForm /> : <SignupForm />}
+                </div>
+              </div>
             </CardContent>
           </Card>
         </motion.div>
