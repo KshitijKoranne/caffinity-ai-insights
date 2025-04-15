@@ -8,6 +8,7 @@ import { formatTimeForDisplay, isToday } from "@/utils/dateUtils";
 import {
   Tooltip,
   TooltipContent,
+  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useState } from "react";
@@ -38,14 +39,16 @@ const EntriesList = ({ entries, onEntryDelete, allowDelete = false }: EntriesLis
   // Helper function to safely render tooltip
   const renderTooltip = (triggerElement: React.ReactNode, content: string) => {
     return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          {triggerElement}
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>{content}</p>
-        </TooltipContent>
-      </Tooltip>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {triggerElement}
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{content}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     );
   };
 
