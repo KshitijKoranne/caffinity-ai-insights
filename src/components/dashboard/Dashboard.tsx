@@ -15,6 +15,7 @@ const Dashboard = () => {
   const [entries, setEntries] = useState<CaffeineEntry[]>([]);
   const [currentDate, setCurrentDate] = useState(getCurrentDateYMD());
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"today" | "history">("today");
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -38,6 +39,7 @@ const Dashboard = () => {
     try {
       console.log("Dashboard - Loading latest caffeine data for date:", currentDate);
       setLoading(true);
+      setError(null);
       
       // Load caffeine data
       const total = await getDailyCaffeineTotal(currentDate);
@@ -49,10 +51,18 @@ const Dashboard = () => {
       
       setCaffeineTotal(total);
       setRecommendedLimit(limit);
-      setEntries(todayEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
-      console.log("Today's entries loaded:", todayEntries);
+      
+      // Make sure we have valid entries before setting state
+      if (Array.isArray(todayEntries)) {
+        setEntries(todayEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+        console.log("Today's entries loaded:", todayEntries);
+      } else {
+        console.error("Invalid entries returned:", todayEntries);
+        setEntries([]);
+      }
     } catch (error) {
       console.error("Error loading caffeine data:", error);
+      setError("Failed to load data. Please try refreshing the page.");
     } finally {
       setLoading(false);
     }
@@ -81,7 +91,7 @@ const Dashboard = () => {
   // Handle case where user is not authenticated
   useEffect(() => {
     if (!user && !loading) {
-      navigate("/auth");
+      navigate("/");
     }
   }, [user, loading, navigate]);
 
@@ -99,12 +109,31 @@ const Dashboard = () => {
       window.dispatchEvent(new Event("caffeineDataUpdated"));
     } catch (error) {
       console.error("Error deleting entry:", error);
+      setError("Failed to delete entry. Please try again.");
     }
   };
 
   // Calculate percentage of recommended limit
   const percentage = Math.min(Math.round((caffeineTotal / recommendedLimit) * 100), 100);
   console.log("Calculated caffeine total:", caffeineTotal, "mg");
+
+  // If there's an error, show error message
+  if (error) {
+    return (
+      <div className="p-4 space-y-6">
+        <div className="bg-red-50 p-4 rounded-md border border-red-200 text-red-800">
+          <h3 className="font-medium">Something went wrong</h3>
+          <p className="text-sm">{error}</p>
+          <button 
+            className="mt-2 px-4 py-2 bg-red-100 rounded-md hover:bg-red-200 transition-colors"
+            onClick={() => loadCaffeineData()}
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 space-y-6 pb-20">

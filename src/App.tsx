@@ -12,9 +12,17 @@ import Auth from "./pages/Auth";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import Index from "./pages/Index";
 
 // Create a new query client instance outside of component render
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 // Properly structured component with React root
 function App() {
@@ -27,6 +35,7 @@ function App() {
               {/* Public Routes */}
               <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/index" element={<Index />} />
               
               {/* Protected Routes */}
               <Route path="/dashboard" element={
@@ -58,7 +67,7 @@ function App() {
                 </ProtectedRoute>
               } />
               
-              {/* Remove /login route that was duplicating functionality */}
+              {/* Catch all route */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthProvider>

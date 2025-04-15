@@ -35,6 +35,9 @@ const DashboardTabs = ({
   isLoading
 }: DashboardTabsProps) => {
   const isCurrentDateToday = isToday(parseISO(currentDate));
+  
+  // Ensure entries is always an array
+  const safeEntries = Array.isArray(entries) ? entries : [];
 
   if (isLoading) {
     return (
@@ -93,7 +96,7 @@ const DashboardTabs = ({
           </h2>
           
           <EntriesList 
-            entries={entries} 
+            entries={safeEntries}
             onEntryDelete={handleDeleteEntry}
             allowDelete={isCurrentDateToday}
           />

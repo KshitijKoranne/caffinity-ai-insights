@@ -25,16 +25,21 @@ export const getCaffeineEntries = async (): Promise<CaffeineEntry[]> => {
       return [];
     }
     
+    if (!Array.isArray(entries)) {
+      console.error('Expected array of entries but got:', entries);
+      return [];
+    }
+    
     console.log('Retrieved caffeine entries from Supabase:', entries.length);
     
     // Transform from Supabase format to application format
     return entries.map(entry => ({
-      id: entry.id,
-      beverageId: entry.beverage_id,
-      beverageName: entry.beverage_name,
-      caffeineAmount: entry.caffeine_amount,
-      servingSize: entry.serving_size,
-      date: entry.date,
+      id: entry.id || '',
+      beverageId: entry.beverage_id || '',
+      beverageName: entry.beverage_name || '',
+      caffeineAmount: entry.caffeine_amount || 0,
+      servingSize: entry.serving_size || '',
+      date: entry.date || new Date().toISOString(),
       notes: entry.notes || undefined,
       userId: entry.user_id
     }));
@@ -51,7 +56,7 @@ export const saveCaffeineEntry = async (entry: CaffeineEntry): Promise<void> => 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       console.error('No user logged in');
-      return;
+      throw new Error('User not authenticated');
     }
 
     console.log(`Saving new caffeine entry for user ${user.id}`);
@@ -74,11 +79,13 @@ export const saveCaffeineEntry = async (entry: CaffeineEntry): Promise<void> => 
     
     if (error) {
       console.error('Error saving caffeine entry:', error);
+      throw new Error('Failed to save caffeine entry');
     } else {
       console.log("Caffeine entry saved successfully");
     }
   } catch (error) {
     console.error('Error saving caffeine entry:', error);
+    throw error;
   }
 };
 
@@ -94,10 +101,12 @@ export const deleteCaffeineEntry = async (entryId: string): Promise<void> => {
     
     if (error) {
       console.error('Error deleting caffeine entry:', error);
+      throw new Error('Failed to delete caffeine entry');
     } else {
       console.log("Entry deleted successfully");
     }
   } catch (error) {
     console.error('Error deleting caffeine entry:', error);
+    throw error;
   }
 };
