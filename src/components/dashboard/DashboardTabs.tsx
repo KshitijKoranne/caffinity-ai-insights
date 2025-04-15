@@ -10,6 +10,7 @@ import { TrendingUp } from "lucide-react";
 import { CaffeineEntry } from "@/utils/caffeineData";
 import { isToday } from "date-fns";
 import { parseISO } from "date-fns";
+import { useEffect, useState } from "react";
 
 interface DashboardTabsProps {
   activeTab: "today" | "history";
@@ -34,10 +35,19 @@ const DashboardTabs = ({
   handleDeleteEntry,
   isLoading
 }: DashboardTabsProps) => {
+  const [safeEntries, setSafeEntries] = useState<CaffeineEntry[]>([]);
   const isCurrentDateToday = isToday(parseISO(currentDate));
   
-  // Ensure entries is always an array
-  const safeEntries = Array.isArray(entries) ? entries : [];
+  // Use an effect to safely update entries
+  useEffect(() => {
+    // Ensure entries is always an array before setting state
+    if (Array.isArray(entries)) {
+      setSafeEntries(entries);
+    } else {
+      console.warn("Received non-array entries:", entries);
+      setSafeEntries([]);
+    }
+  }, [entries]);
 
   if (isLoading) {
     return (
@@ -47,6 +57,16 @@ const DashboardTabs = ({
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 1.5, repeat: Infinity }}
         >Loading...</motion.div>
+      </div>
+    );
+  }
+
+  // Safety check for invalid data during rendering
+  if (!Array.isArray(safeEntries)) {
+    console.error("safeEntries is not an array in render");
+    return (
+      <div className="p-4 text-center text-red-500">
+        Error displaying data. Please refresh the page.
       </div>
     );
   }

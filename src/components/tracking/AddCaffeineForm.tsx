@@ -14,6 +14,7 @@ import {
   formatServingSizeWithUnit
 } from "@/utils/caffeineData";
 import { Coffee, ArrowLeft } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const AddCaffeineForm = () => {
   const [selectedBeverage, setSelectedBeverage] = useState("");
@@ -22,6 +23,7 @@ const AddCaffeineForm = () => {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [unitPreference, setUnitPreference] = useState<"oz" | "ml" | "cup">("oz");
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     // Load user preferences
@@ -67,19 +69,34 @@ const AddCaffeineForm = () => {
       
       // Save the entry
       console.log("Saving caffeine entry:", entry);
-      await saveCaffeineEntry(entry);
+      const success = await saveCaffeineEntry(entry);
       
-      // Make sure to dispatch the event globally so it can be caught by all components
-      window.dispatchEvent(new Event('caffeineDataUpdated'));
-      
-      console.log("Added new caffeine entry:", entry);
-      console.log("Event dispatched: caffeineDataUpdated");
-      
-      // Navigate back to dashboard
-      navigate("/dashboard");
+      if (success) {
+        // Show success toast
+        toast({
+          title: "Caffeine logged",
+          description: `Added ${beverage.name} with ${beverage.caffeine}mg of caffeine.`,
+        });
+        
+        // Make sure to dispatch the event globally so it can be caught by all components
+        window.dispatchEvent(new Event('caffeineDataUpdated'));
+        
+        console.log("Added new caffeine entry:", entry);
+        console.log("Event dispatched: caffeineDataUpdated");
+        
+        // Navigate back to dashboard
+        navigate("/dashboard");
+      } else {
+        throw new Error("Failed to save entry");
+      }
     } catch (error) {
       console.error("Error adding caffeine entry:", error);
       setSubmitError("Failed to save entry. Please try again.");
+      toast({
+        title: "Error",
+        description: "Failed to save caffeine entry. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setIsSubmitting(false);
     }

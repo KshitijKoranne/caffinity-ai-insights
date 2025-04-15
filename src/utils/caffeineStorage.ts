@@ -45,12 +45,12 @@ export const getCaffeineEntries = async (): Promise<CaffeineEntry[]> => {
     }));
   } catch (error) {
     console.error('Error getting caffeine entries:', error);
-    return [];
+    throw error; // Throw error so it can be handled by the caller
   }
 };
 
 // Save caffeine entry to Supabase
-export const saveCaffeineEntry = async (entry: CaffeineEntry): Promise<void> => {
+export const saveCaffeineEntry = async (entry: CaffeineEntry): Promise<boolean> => {
   try {
     // Get the current user ID
     const { data: { user } } = await supabase.auth.getUser();
@@ -65,7 +65,7 @@ export const saveCaffeineEntry = async (entry: CaffeineEntry): Promise<void> => 
     // We'll create an object without the custom string ID
     const { id, ...entryWithoutId } = entry;
     
-    const { error } = await supabase
+    const { error, data } = await supabase
       .from('caffeine_entries')
       .insert({
         beverage_id: entryWithoutId.beverageId,
@@ -75,13 +75,15 @@ export const saveCaffeineEntry = async (entry: CaffeineEntry): Promise<void> => 
         date: entryWithoutId.date,
         notes: entryWithoutId.notes || null,
         user_id: user.id
-      });
+      })
+      .select();
     
     if (error) {
       console.error('Error saving caffeine entry:', error);
       throw new Error('Failed to save caffeine entry');
     } else {
-      console.log("Caffeine entry saved successfully");
+      console.log("Caffeine entry saved successfully:", data);
+      return true;
     }
   } catch (error) {
     console.error('Error saving caffeine entry:', error);

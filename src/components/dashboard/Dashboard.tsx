@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { CaffeineEntry, getDailyCaffeineTotal, getCaffeineEntriesForDate, getRecommendedCaffeineLimit, deleteCaffeineEntry } from "@/utils/caffeineData";
+import { CaffeineEntry, getDailyCaffeineTotal, getCaffeineEntriesForDate, getRecommendedCaffeineLimit } from "@/utils/caffeineData";
 import { getCurrentDateYMD } from "@/utils/dateUtils";
 import { Coffee } from "lucide-react";
 import { motion } from "framer-motion";
@@ -8,6 +8,7 @@ import DateNavigation from "./DateNavigation";
 import DashboardTabs from "./DashboardTabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
 
 const Dashboard = () => {
   const [caffeineTotal, setCaffeineTotal] = useState(0);
@@ -19,6 +20,7 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState<"today" | "history">("today");
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   // Get greeting based on time of day
   const getGreeting = () => {
@@ -63,6 +65,11 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Error loading caffeine data:", error);
       setError("Failed to load data. Please try refreshing the page.");
+      toast({
+        title: "Error loading data",
+        description: "Failed to load caffeine data. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
@@ -102,7 +109,16 @@ const Dashboard = () => {
   // Handle entry deletion
   const handleDeleteEntry = async (entryId: string) => {
     try {
+      // Import the deleteCaffeineEntry function only when needed
+      const { deleteCaffeineEntry } = await import("@/utils/caffeineStorage");
       await deleteCaffeineEntry(entryId);
+      
+      toast({
+        title: "Entry deleted",
+        description: "Your caffeine entry was successfully deleted.",
+      });
+      
+      // Reload data
       await loadCaffeineData();
       
       // Dispatch event to update other components
@@ -110,6 +126,11 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Error deleting entry:", error);
       setError("Failed to delete entry. Please try again.");
+      toast({
+        title: "Delete failed",
+        description: "Failed to delete entry. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
