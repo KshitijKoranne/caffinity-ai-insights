@@ -1,5 +1,5 @@
 
-import { createContext, useContext, useState, useEffect, ReactNode, FC } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 
@@ -17,8 +17,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Correct way to define the AuthProvider component as a proper React functional component
-export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
+// Define the AuthProvider component as a proper React functional component
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
@@ -63,6 +63,40 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     };
   }, [user, lastActivity]);
 
+  // Function declarations
+  const signIn = async (email: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      return { error };
+    } catch (error) {
+      return { error };
+    }
+  };
+
+  const signUp = async (email: string, password: string, name: string) => {
+    try {
+      const { error } = await supabase.auth.signUp({ 
+        email, 
+        password,
+        options: {
+          data: {
+            name,
+          }
+        }
+      });
+      return { error };
+    } catch (error) {
+      return { error };
+    }
+  };
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    localStorage.removeItem("caffinity-current-user");
+    localStorage.removeItem("caffinity-last-activity");
+  };
+
+  // Auth state management
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data } = supabase.auth.onAuthStateChange(
@@ -110,38 +144,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       data.subscription.unsubscribe();
     };
   }, []);
-
-  const signIn = async (email: string, password: string) => {
-    try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      return { error };
-    } catch (error) {
-      return { error };
-    }
-  };
-
-  const signUp = async (email: string, password: string, name: string) => {
-    try {
-      const { error } = await supabase.auth.signUp({ 
-        email, 
-        password,
-        options: {
-          data: {
-            name,
-          }
-        }
-      });
-      return { error };
-    } catch (error) {
-      return { error };
-    }
-  };
-
-  const signOut = async () => {
-    await supabase.auth.signOut();
-    localStorage.removeItem("caffinity-current-user");
-    localStorage.removeItem("caffinity-last-activity");
-  };
 
   const value = {
     user,

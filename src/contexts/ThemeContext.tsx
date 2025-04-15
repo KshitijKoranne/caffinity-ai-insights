@@ -11,13 +11,11 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-// Define ThemeProvider as a proper FC (Functional Component)
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   // Initialize state with 'light' as default
   const [theme, setThemeState] = useState<Theme>('light');
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  // Apply theme class and store in localStorage when it changes
   useEffect(() => {
     // Get initial theme from localStorage or system preference
     const getInitialTheme = (): Theme => {
@@ -39,7 +37,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     setThemeState(getInitialTheme());
 
     // Apply theme to document
-    if (theme && typeof window !== 'undefined') {
+    if (typeof window !== 'undefined') {
       const root = window.document.documentElement;
       root.classList.remove('light', 'dark');
       root.classList.add(theme);
