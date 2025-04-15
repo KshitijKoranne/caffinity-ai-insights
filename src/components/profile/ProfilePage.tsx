@@ -1,40 +1,17 @@
 
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { useToast } from "@/components/ui/use-toast";
-import { LogOut, User, Settings, Save } from "lucide-react";
+import { User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
-import { useTheme } from "@/contexts/ThemeContext";
-import { UnitPreference, getUserPreferences, saveUserPreferences } from "@/utils/caffeineData";
-
-interface Profile {
-  id: string;
-  name: string | null;
-  email: string | null;
-  created_at: string;
-  updated_at: string;
-}
+import AccountInfoCard from "./AccountInfoCard";
+import LogoutButton from "./LogoutButton";
+import SettingsCard from "./SettingsCard";
 
 const ProfilePage = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [unitPreference, setUnitPreference] = useState<UnitPreference>("oz");
-  const [isLoadingPreferences, setIsLoadingPreferences] = useState(true);
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const { user, signOut } = useAuth();
-  const { theme, toggleTheme } = useTheme();
-  
+  const { user } = useAuth();
+
   useEffect(() => {
     const loadProfile = async () => {
       if (!user) return;
@@ -55,84 +32,11 @@ const ProfilePage = () => {
         }
       } catch (error: any) {
         console.error('Error loading profile:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load profile data",
-          variant: "destructive",
-        });
-      }
-      
-      // Load user preferences
-      try {
-        setIsLoadingPreferences(true);
-        const { unitPreference: savedUnit } = await getUserPreferences();
-        setUnitPreference(savedUnit);
-      } catch (error) {
-        console.error('Error loading user preferences:', error);
-      } finally {
-        setIsLoadingPreferences(false);
       }
     };
     
     loadProfile();
-  }, [user, toast]);
-
-  const handleSaveProfile = async () => {
-    if (!user) return;
-    
-    setIsSaving(true);
-    
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ name })
-        .eq('id', user.id);
-      
-      if (error) throw error;
-      
-      setIsEditing(false);
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been successfully updated.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update profile",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleUnitPreferenceChange = async (value: UnitPreference) => {
-    try {
-      setUnitPreference(value);
-      await saveUserPreferences({ unitPreference: value });
-      
-      toast({
-        title: "Preference updated",
-        description: `Serving size unit changed to ${value}`,
-      });
-    } catch (error) {
-      console.error('Error saving unit preference:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save unit preference",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      navigate("/");
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
-  };
+  }, [user]);
 
   return (
     <div className="p-4 space-y-6 pb-20">
@@ -146,125 +50,15 @@ const ProfilePage = () => {
         </div>
       </header>
 
-      <Card className="border-coffee/20">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-lg">Account Information</CardTitle>
-          {!isEditing ? (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => setIsEditing(true)}
-            >
-              <Settings className="h-4 w-4 mr-1" />
-              Edit
-            </Button>
-          ) : (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleSaveProfile}
-              disabled={isSaving}
-            >
-              <Save className="h-4 w-4 mr-1" />
-              {isSaving ? "Saving..." : "Save"}
-            </Button>
-          )}
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              disabled={!isEditing}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              disabled={true}
-              className="bg-muted"
-            />
-            <p className="text-xs text-muted-foreground">Email address cannot be changed</p>
-          </div>
-          
-          <div className="pt-4">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm" className="w-full">
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Logout
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    You will be logged out of your account.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleLogout}>
-                    Logout
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Account Information Card */}
+      <AccountInfoCard name={name} email={email} userId={user?.id} />
       
-      {/* Settings card */}
-      <Card className="border-coffee/20">
-        <CardHeader>
-          <CardTitle className="text-lg">App Settings</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-sm font-medium mb-2">Theme</h3>
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">Switch between light and dark mode</p>
-                <ThemeSwitcher />
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium">Serving Size Units</h3>
-              <p className="text-xs text-muted-foreground mb-2">Choose your preferred unit for beverage serving sizes</p>
-              
-              {isLoadingPreferences ? (
-                <div className="text-sm text-muted-foreground">Loading preferences...</div>
-              ) : (
-                <RadioGroup 
-                  value={unitPreference} 
-                  onValueChange={(value) => handleUnitPreferenceChange(value as UnitPreference)}
-                  className="flex flex-col space-y-1"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="oz" id="oz" />
-                    <Label htmlFor="oz">Ounces (oz)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="ml" id="ml" />
-                    <Label htmlFor="ml">Milliliters (ml)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="cup" id="cup" />
-                    <Label htmlFor="cup">Cups</Label>
-                  </div>
-                </RadioGroup>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="pt-4">
+        <LogoutButton />
+      </div>
+      
+      {/* Settings Card */}
+      <SettingsCard />
       
       <div className="text-center text-xs text-muted-foreground mt-8">
         Caffinity v1.0.0

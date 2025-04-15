@@ -3,6 +3,9 @@ import { createContext, useContext, useState, useEffect, ReactNode, FC } from "r
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 
+// Set auto logout timeout to 30 minutes (in milliseconds)
+const AUTO_LOGOUT_TIME = 30 * 60 * 1000;
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -19,6 +22,46 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [lastActivity, setLastActivity] = useState(Date.now());
+
+  // Handler for user activity
+  const updateLastActivity = () => {
+    setLastActivity(Date.now());
+    localStorage.setItem("caffinity-last-activity", Date.now().toString());
+  };
+
+  useEffect(() => {
+    // Set up activity listeners
+    const events = ['mousedown', 'keydown', 'touchstart', 'scroll'];
+    events.forEach(event => {
+      window.addEventListener(event, updateLastActivity);
+    });
+
+    // Clean up activity listeners
+    return () => {
+      events.forEach(event => {
+        window.removeEventListener(event, updateLastActivity);
+      });
+    };
+  }, []);
+
+  // Auto logout effect
+  useEffect(() => {
+    // Check for inactivity every minute
+    const checkInactivity = setInterval(() => {
+      const lastActivityTime = Number(localStorage.getItem("caffinity-last-activity")) || lastActivity;
+      const currentTime = Date.now();
+      
+      if (currentTime - lastActivityTime > AUTO_LOGOUT_TIME && user) {
+        console.log("Auto logging out due to inactivity");
+        signOut();
+      }
+    }, 60000); // Check every minute
+
+    return () => {
+      clearInterval(checkInactivity);
+    };
+  }, [user, lastActivity]);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -31,8 +74,11 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         // Store current user ID in localStorage for data isolation
         if (currentSession?.user) {
           localStorage.setItem("caffinity-current-user", currentSession.user.id);
+          // Initialize last activity time
+          updateLastActivity();
         } else if (event === 'SIGNED_OUT') {
           localStorage.removeItem("caffinity-current-user");
+          localStorage.removeItem("caffinity-last-activity");
         }
       }
     );
@@ -47,6 +93,8 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         // Store current user ID in localStorage for data isolation
         if (currentSession?.user) {
           localStorage.setItem("caffinity-current-user", currentSession.user.id);
+          // Initialize last activity time
+          updateLastActivity();
         }
       } catch (error) {
         console.error("Error getting session:", error);
@@ -92,6 +140,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const signOut = async () => {
     await supabase.auth.signOut();
     localStorage.removeItem("caffinity-current-user");
+    localStorage.removeItem("caffinity-last-activity");
   };
 
   const value = {
