@@ -15,15 +15,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   
   useEffect(() => {
     // Add a small delay to ensure authentication state is properly loaded
-    // This helps prevent flashing of protected content or multiple redirects
     const timer = setTimeout(() => {
       setIsReady(true);
-    }, 100);
+    }, 200);
     
     return () => clearTimeout(timer);
   }, [user, loading]);
   
-  // Don't render anything until we're sure about authentication state
+  // Show loading state until we're sure about authentication
   if (loading || !isReady) {
     return (
       <div className="h-screen w-full flex flex-col items-center justify-center">
@@ -33,16 +32,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
   
-  // Redirect to landing page if not authenticated
+  // If not authenticated, redirect to landing page
   if (!user) {
     console.log("ProtectedRoute: No user found, redirecting to landing page");
     return <Navigate to="/" state={{ from: location.pathname }} replace />;
   }
   
-  // Log for debugging
-  console.log("ProtectedRoute: User is authenticated, rendering protected content");
-  
-  // Render children if authenticated
+  // User is authenticated, render children
   return <>{children}</>;
 };
 

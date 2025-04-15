@@ -25,7 +25,7 @@ export const getCaffeineEntries = async (): Promise<CaffeineEntry[]> => {
       return [];
     }
     
-    if (!Array.isArray(entries)) {
+    if (!entries || !Array.isArray(entries)) {
       console.error('Expected array of entries but got:', entries);
       return [];
     }
@@ -45,7 +45,7 @@ export const getCaffeineEntries = async (): Promise<CaffeineEntry[]> => {
     }));
   } catch (error) {
     console.error('Error getting caffeine entries:', error);
-    throw error; // Throw error so it can be handled by the caller
+    return [];
   }
 };
 
@@ -59,13 +59,13 @@ export const saveCaffeineEntry = async (entry: CaffeineEntry): Promise<boolean> 
       throw new Error('User not authenticated');
     }
 
-    console.log(`Saving new caffeine entry for user ${user.id}`);
+    console.log(`Saving new caffeine entry for user ${user.id}`, entry);
     
     // Remove the id field to let Supabase generate a UUID
     // We'll create an object without the custom string ID
     const { id, ...entryWithoutId } = entry;
     
-    const { error, data } = await supabase
+    const { error } = await supabase
       .from('caffeine_entries')
       .insert({
         beverage_id: entryWithoutId.beverageId,
@@ -75,24 +75,23 @@ export const saveCaffeineEntry = async (entry: CaffeineEntry): Promise<boolean> 
         date: entryWithoutId.date,
         notes: entryWithoutId.notes || null,
         user_id: user.id
-      })
-      .select();
+      });
     
     if (error) {
       console.error('Error saving caffeine entry:', error);
-      throw new Error('Failed to save caffeine entry');
+      return false;
     } else {
-      console.log("Caffeine entry saved successfully:", data);
+      console.log("Caffeine entry saved successfully");
       return true;
     }
   } catch (error) {
     console.error('Error saving caffeine entry:', error);
-    throw error;
+    return false;
   }
 };
 
 // Delete caffeine entry from Supabase
-export const deleteCaffeineEntry = async (entryId: string): Promise<void> => {
+export const deleteCaffeineEntry = async (entryId: string): Promise<boolean> => {
   try {
     console.log(`Deleting caffeine entry with ID: ${entryId}`);
     
@@ -103,12 +102,13 @@ export const deleteCaffeineEntry = async (entryId: string): Promise<void> => {
     
     if (error) {
       console.error('Error deleting caffeine entry:', error);
-      throw new Error('Failed to delete caffeine entry');
+      return false;
     } else {
       console.log("Entry deleted successfully");
+      return true;
     }
   } catch (error) {
     console.error('Error deleting caffeine entry:', error);
-    throw error;
+    return false;
   }
 };

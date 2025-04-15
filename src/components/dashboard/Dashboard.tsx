@@ -7,8 +7,6 @@ import { motion } from "framer-motion";
 import DateNavigation from "./DateNavigation";
 import DashboardTabs from "./DashboardTabs";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
 
 const Dashboard = () => {
   const [caffeineTotal, setCaffeineTotal] = useState(0);
@@ -19,8 +17,6 @@ const Dashboard = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"today" | "history">("today");
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const { toast } = useToast();
 
   // Get greeting based on time of day
   const getGreeting = () => {
@@ -34,10 +30,6 @@ const Dashboard = () => {
   const userName = user?.user_metadata?.name || "there";
 
   const loadCaffeineData = async () => {
-    if (!user) {
-      return; // Don't load data if user isn't authenticated
-    }
-    
     try {
       console.log("Dashboard - Loading latest caffeine data for date:", currentDate);
       setLoading(true);
@@ -49,9 +41,9 @@ const Dashboard = () => {
       const todayEntries = await getCaffeineEntriesForDate(currentDate);
       
       console.log("Caffeine total:", total, "mg");
-      console.log("Entries found:", todayEntries.length);
+      console.log("Entries found:", todayEntries?.length || 0);
       
-      setCaffeineTotal(total);
+      setCaffeineTotal(total || 0);
       setRecommendedLimit(limit);
       
       // Make sure we have valid entries before setting state
@@ -65,18 +57,13 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Error loading caffeine data:", error);
       setError("Failed to load data. Please try refreshing the page.");
-      toast({
-        title: "Error loading data",
-        description: "Failed to load caffeine data. Please try again.",
-        variant: "destructive"
-      });
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    // Ensure we have a user before loading data
+    // Only load data if we have a user
     if (user) {
       console.log("Dashboard component mounted, loading initial data");
       loadCaffeineData();
@@ -95,13 +82,6 @@ const Dashboard = () => {
     }
   }, [currentDate, user]);
 
-  // Handle case where user is not authenticated
-  useEffect(() => {
-    if (!user && !loading) {
-      navigate("/");
-    }
-  }, [user, loading, navigate]);
-
   const handleDateChange = (date: string) => {
     setCurrentDate(date);
   };
@@ -113,11 +93,6 @@ const Dashboard = () => {
       const { deleteCaffeineEntry } = await import("@/utils/caffeineStorage");
       await deleteCaffeineEntry(entryId);
       
-      toast({
-        title: "Entry deleted",
-        description: "Your caffeine entry was successfully deleted.",
-      });
-      
       // Reload data
       await loadCaffeineData();
       
@@ -126,11 +101,6 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Error deleting entry:", error);
       setError("Failed to delete entry. Please try again.");
-      toast({
-        title: "Delete failed",
-        description: "Failed to delete entry. Please try again.",
-        variant: "destructive"
-      });
     }
   };
 
