@@ -1,6 +1,5 @@
 
-// Re-export useToast and toast from their actual location
+// This file is just a re-export to maintain compatibility with shadcn/ui structure
 import { useToast, toast } from "@/hooks/use-toast";
 
-// Export but don't use in the app
 export { useToast, toast };
