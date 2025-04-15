@@ -1,5 +1,5 @@
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { Coffee, LineChart } from "lucide-react";
 import { CaffeineHistoryChart } from "../history/CaffeineHistoryChart";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,6 +11,7 @@ import { CaffeineEntry } from "@/utils/caffeineData";
 import { isToday } from "date-fns";
 import { parseISO } from "date-fns";
 import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface DashboardTabsProps {
   activeTab: "today" | "history";
@@ -72,19 +73,31 @@ const DashboardTabs = ({
   }
 
   return (
-    <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "today" | "history")}>
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="today" className="flex items-center gap-2">
+    <TabsPrimitive.Root value={activeTab} onValueChange={(value) => setActiveTab(value as "today" | "history")}>
+      <TabsPrimitive.List className="grid w-full grid-cols-2 inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground">
+        <TabsPrimitive.Trigger 
+          value="today" 
+          className={cn(
+            "flex items-center gap-2 inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+            activeTab === "today" ? "bg-background text-foreground shadow-sm" : ""
+          )}
+        >
           <Coffee className="h-4 w-4" />
           Daily Log
-        </TabsTrigger>
-        <TabsTrigger value="history" className="flex items-center gap-2">
+        </TabsPrimitive.Trigger>
+        <TabsPrimitive.Trigger 
+          value="history" 
+          className={cn(
+            "flex items-center gap-2 inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+            activeTab === "history" ? "bg-background text-foreground shadow-sm" : ""
+          )}
+        >
           <LineChart className="h-4 w-4" />
           History
-        </TabsTrigger>
-      </TabsList>
+        </TabsPrimitive.Trigger>
+      </TabsPrimitive.List>
       
-      <TabsContent value="today" className="space-y-6 mt-4">
+      <TabsPrimitive.Content value="today" className="space-y-6 mt-4">
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -121,9 +134,9 @@ const DashboardTabs = ({
             allowDelete={isCurrentDateToday}
           />
         </motion.div>
-      </TabsContent>
+      </TabsPrimitive.Content>
       
-      <TabsContent value="history" className="mt-4">
+      <TabsPrimitive.Content value="history" className="mt-4">
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -131,8 +144,8 @@ const DashboardTabs = ({
         >
           <CaffeineHistoryChart />
         </motion.div>
-      </TabsContent>
-    </Tabs>
+      </TabsPrimitive.Content>
+    </TabsPrimitive.Root>
   );
 };
 
