@@ -13,7 +13,6 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Index from "./pages/Index";
-import { Toaster } from "./components/ui/toaster";
 
 // Create a new query client instance outside of component render
 const queryClient = new QueryClient({
@@ -72,7 +71,6 @@ function App() {
               {/* Catch all route */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-            <Toaster />
           </AuthProvider>
         </BrowserRouter>
       </ThemeProvider>

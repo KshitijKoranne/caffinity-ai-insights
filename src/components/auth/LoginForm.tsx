@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
 import { Eye, EyeOff, Mail } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -13,32 +12,25 @@ const LoginForm = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
   const { signIn } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrorMessage("");
     
     try {
       const { error } = await signIn(email, password);
       
       if (error) {
-        toast({
-          title: "Error",
-          description: error.message || "Failed to sign in. Please check your credentials.",
-          variant: "destructive",
-        });
+        setErrorMessage(error.message || "Failed to sign in. Please check your credentials.");
       } else {
         navigate("/dashboard");
       }
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
-      });
+      setErrorMessage(error.message || "An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -46,6 +38,12 @@ const LoginForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {errorMessage && (
+        <div className="bg-red-50 p-3 rounded-md border border-red-200 text-red-800">
+          <p className="text-sm">{errorMessage}</p>
+        </div>
+      )}
+
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <div className="relative">
