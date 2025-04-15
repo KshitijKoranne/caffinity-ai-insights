@@ -26,7 +26,12 @@ const NavItem = ({ icon, label, isActive, onClick }: NavItemProps) => (
   </Button>
 );
 
-const AppLayout = ({ children }: { children: ReactNode }) => {
+interface AppLayoutProps {
+  children: ReactNode;
+}
+
+const AppLayout = ({ children }: AppLayoutProps) => {
+  // Make sure these hooks are used directly in the component function
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;

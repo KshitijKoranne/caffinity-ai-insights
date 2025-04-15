@@ -39,34 +39,46 @@ function App() {
               <Route path="/index" element={<Index />} />
               
               {/* Protected Routes */}
-              <Route path="/dashboard" element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <Dashboard />
-                  </AppLayout>
-                </ProtectedRoute>
-              } />
-              <Route path="/add" element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <AddCaffeineForm />
-                  </AppLayout>
-                </ProtectedRoute>
-              } />
-              <Route path="/catalog" element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <BeverageCatalog />
-                  </AppLayout>
-                </ProtectedRoute>
-              } />
-              <Route path="/profile" element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <ProfilePage />
-                  </AppLayout>
-                </ProtectedRoute>
-              } />
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <Dashboard />
+                    </AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/add" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <AddCaffeineForm />
+                    </AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/catalog" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <BeverageCatalog />
+                    </AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/profile" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <ProfilePage />
+                    </AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
               
               {/* Catch all route */}
               <Route path="*" element={<NotFound />} />
