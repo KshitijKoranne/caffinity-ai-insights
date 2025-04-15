@@ -1,5 +1,5 @@
 
-import { createContext, useContext, useState, useEffect, ReactNode, FC } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 type Theme = 'light' | 'dark';
 
@@ -12,10 +12,9 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 // Define ThemeProvider as a proper FC (Functional Component)
-export const ThemeProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  // Initialize state with 'light' as default to avoid hydration mismatch
+export const ThemeProvider = ({ children }: { children: ReactNode }) => {
+  // Initialize state with 'light' as default
   const [theme, setThemeState] = useState<Theme>('light');
-  // Add a state to track if theme is currently transitioning to prevent multiple toggles
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Apply theme class and store in localStorage when it changes
@@ -36,13 +35,11 @@ export const ThemeProvider: FC<{ children: ReactNode }> = ({ children }) => {
       return 'light'; // Default theme
     };
     
-    // Set initial theme only on first render
+    // Set initial theme
     setThemeState(getInitialTheme());
-  }, []);
 
-  // Apply theme changes to document and localStorage
-  useEffect(() => {
-    if (theme) {
+    // Apply theme to document
+    if (theme && typeof window !== 'undefined') {
       const root = window.document.documentElement;
       root.classList.remove('light', 'dark');
       root.classList.add(theme);
